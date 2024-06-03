@@ -80,7 +80,7 @@ const RegisterForm = () => {
   return (
     <div className="flex justify-center items-center h-fit bg-gray-100">
       <div className="w-full max-w-md p-6 bg-white shadow-md rounded-md">
-        <h1 className="text-3xl font-bold mb-6">Sign up into JS GROUP'S</h1>
+        <h1 className="text-3xl font-bold mb-6">Sign up into JR GROUP'S</h1>
         <span className="text-center mb-5">
           Please fill in the form to get started with your account.
         </span>
