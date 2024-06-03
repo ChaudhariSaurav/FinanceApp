@@ -69,7 +69,7 @@ const LoginForm = () => {
             color: "#52c41a", // Green text
           },
         });
-        navigate("/dashboard");
+        window.location.href('/dashboard');
         // Redirect to dashboard or desired page after successful login
       }
     } catch (error) {
@@ -105,9 +105,9 @@ const LoginForm = () => {
       if (response.data.customerId) {
         notification.error({
           message: response.data,
-          description: response.data.message,
+          description: response.data?.message,
         });
-        setVisible(false); // Close the modal after successful submission
+        setVisible(false);
       } else {
         notification.success({
           message: "Success",
