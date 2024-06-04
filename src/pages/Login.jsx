@@ -1,21 +1,21 @@
 import React, { useState } from "react";
-import { Form, Input, Button, Modal, notification } from "antd";
+import { Form, Input, Button, notification } from "antd";
 import {
   UserOutlined,
   LockOutlined,
   EyeInvisibleOutlined,
+  GoogleOutlined,
   EyeTwoTone,
 } from "@ant-design/icons";
 import axios from "axios";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 const LoginForm = () => {
   const [customerId, setCustomerId] = useState("");
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
-  const [forgotPasswordVisible, setForgotPasswordVisible] = useState(false);
+
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -28,14 +28,6 @@ const LoginForm = () => {
 
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
-  };
-
-  const handleForgotPassword = () => {
-    setForgotPasswordVisible(true); // Open the forgot password modal
-  };
-
-  const handleForgotPasswordCancel = () => {
-    setForgotPasswordVisible(false); // Close the forgot password modal
   };
 
   const onFinish = async () => {
@@ -69,7 +61,7 @@ const LoginForm = () => {
             color: "#52c41a", // Green text
           },
         });
-        window.location.href('/dashboard');
+        window.location.href("/dashboard");
         // Redirect to dashboard or desired page after successful login
       }
     } catch (error) {
@@ -90,179 +82,145 @@ const LoginForm = () => {
     setLoading(false);
   };
 
-  const handleForgotPasswordSubmit = async (values) => {
-    const { mobileNumber, email } = values;
-    try {
-      setLoading(true);
-      const response = await axios.post(
-        "https://e8d764d4-7deb-4a05-afb4-ebe6f8683979-00-2m4thjlwbmxjg.sisko.replit.dev/api/user/get_customer",
-        {
-          mobileNumber,
-          email,
-        },
-      );
-      setLoading(false);
-      if (response.data.customerId) {
-        notification.error({
-          message: response.data,
-          description: response.data?.message,
-        });
-        setVisible(false);
-      } else {
-        notification.success({
-          message: "Success",
-          description: response.data.message,
-        });
-      }
-    } catch (error) {
-      setLoading(false);
-      console.error("Forgot Password Error:", error);
-      notification.error({
-        message: "Forgot Password Failed",
-        description: "An unexpected error occurred. Please try again later.",
-      });
-    }
-  };
   return (
-    <div className="flex justify-center items-center h-fit bg-gray-100">
-      <div className="w-full max-w-md p-6 bg-white shadow-md rounded-md">
-        <h1 className="text-center text-2xl mb-6">Sign in to JR Group's</h1>
-        <Form
-          name="normal_login"
-          className="login-form"
-          initialValues={{ remember: true }}
-          onFinish={onFinish}
-        >
-          <Form.Item
-            name="customerId"
-            rules={[{ required: true, message: "Please enter Customer ID!" }]}
-            className="mb-6"
-          >
-            <Input
-              prefix={<UserOutlined className="site-form-item-icon" />}
-              placeholder="Customer ID"
-              size="large"
-              name="customerId"
-              value={customerId}
-              onChange={handleInputChange}
-              className="w-full"
-            />
-          </Form.Item>
-          <Form.Item
-            name="password"
-            rules={[{ required: true, message: "Please enter your Password!" }]}
-            className="mb-6"
-          >
-            <Input.Password
-              prefix={<LockOutlined className="site-form-item-icon" />}
-              placeholder="Password"
-              size="large"
-              name="password"
-              value={password}
-              onChange={handleInputChange}
-              className="w-full"
-              iconRender={(visible) =>
-                visible ? (
-                  <EyeTwoTone onClick={togglePasswordVisibility} />
-                ) : (
-                  <EyeInvisibleOutlined onClick={togglePasswordVisibility} />
-                )
-              }
-            />
-          </Form.Item>
-          <Form.Item>
-            <a
-              className="text-blue-500 hover:text-blue-700"
-              onClick={handleForgotPassword}
-            >
-              Forgot password
-            </a>
-          </Form.Item>
-          <Form.Item>
-            <Button
-              type="primary"
-              htmlType="submit"
-              block
-              size="large"
-              loading={loading}
-              className="w-full bg-blue-500 hover:bg-blue-700 text-white"
-            >
-              Log in
-            </Button>
-          </Form.Item>
-          <div className="flex justify-center mt-6">
-            <Button type="default" block size="large" className="w-full">
-              Log in with Google
-            </Button>
-          </div>
-
-          <p className="mt-6 text-sm text-center text-gray-600">
-            By signing in you accept the{" "}
-            <a href="#" className="text-indigo-600 hover:underline">
-              Terms of Use
-            </a>{" "}
-            and acknowledge the{" "}
-            <a href="#" className="text-indigo-600 hover:underline">
-              Privacy Statement
-            </a>
-            .
-          </p>
-          <p className="mt-2 text-sm text-center text-gray-600">
-            Don't have an account yet?{" "}
-            <Link
-              to="/auth/register"
-              className="text-indigo-600 hover:underline"
-            >
-              Register now
-            </Link>
-          </p>
-        </Form>
-
-        {/* Forgot Password Modal */}
-        <Modal
-          title="Forgot Password"
-          visible={forgotPasswordVisible}
-          onCancel={handleForgotPasswordCancel}
-          footer={null}
-        >
+    <div className="h-screen bg-gray-100">
+      <div className="flex justify-center items-center">
+        <img
+          src="https://ik.imagekit.io/laxmifinance/adfinancelogo.png?updatedAt=1717456339448"
+          alt="AD FINANCE"
+          className="h-10 w-auto mb-8"
+          style={{ height: "100px", marginTop: "50px" }}
+        />
+      </div>
+      <div className="flex justify-center">
+        <div className="w-full max-w-md p-6 bg-white shadow-md rounded-md">
+          <h1 className="text-center text-2xl mb-6">Sign in to your account</h1>
           <Form
-            name="forgot_password_form"
+            name="normal_login"
+            className="login-form"
             initialValues={{ remember: true }}
-            onFinish={handleForgotPasswordSubmit}
+            onFinish={onFinish}
           >
             <Form.Item
-              name="mobileNumber"
-              rules={[
-                { required: true, message: "Please enter your mobile number!" },
-              ]}
+              name="customerId"
+              rules={[{ required: true, message: "Please enter Customer ID!" }]}
+              className="mb-8"
             >
               <Input
                 prefix={<UserOutlined className="site-form-item-icon" />}
-                placeholder="Mobile Number"
+                placeholder="Enter Customer ID"
                 size="large"
+                name="customerId"
+                value={customerId}
+                onChange={handleInputChange}
+                className="w-full"
               />
             </Form.Item>
             <Form.Item
-              name="email"
+              name="password"
               rules={[
-                { required: true, message: "Please enter your email!" },
-                { type: "email", message: "Invalid email format!" },
+                { required: true, message: "Please enter your Password!" },
               ]}
+              className="mb-6"
             >
-              <Input
-                prefix={<UserOutlined className="site-form-item-icon" />}
-                placeholder="Email"
+              <Input.Password
+                prefix={<LockOutlined className="site-form-item-icon" />}
+                placeholder="Enter Password"
                 size="large"
+                name="password"
+                value={password}
+                onChange={handleInputChange}
+                className="w-full"
+                iconRender={(visible) =>
+                  visible ? (
+                    <EyeTwoTone onClick={togglePasswordVisibility} />
+                  ) : (
+                    <EyeInvisibleOutlined onClick={togglePasswordVisibility} />
+                  )
+                }
               />
             </Form.Item>
             <Form.Item>
-              <Button type="primary" htmlType="submit" block size="large">
-                Submit
+              <div className="flex justify-between">
+                <Link
+                  to={"/forgot-password"}
+                  className="text-blue-500 hover:text-blue-700"
+                >
+                  Forgot your password ?
+                </Link>
+                <Link
+                  to={"/forgot-CustomerId"}
+                  className="text-blue-500 hover:text-blue-700"
+                >
+                  Forgot Customer Id ?
+                </Link>
+              </div>
+            </Form.Item>
+            <Form.Item>
+              <Button
+                type="primary"
+                htmlType="submit"
+                block
+                size="large"
+                loading={loading}
+                className="w-full bg-blue-500 hover:bg-blue-700 text-white"
+              >
+                Log in
               </Button>
             </Form.Item>
+
+            <div className="flex mt-7 items-center text-center">
+              <hr className="border-gray-300 border-1 w-full rounded-md" />
+              <label className="block font-medium text-sm text-gray-600 w-full">
+                Access with
+              </label>
+              <hr className="border-gray-300 border-1 w-full rounded-md" />
+            </div>
+
+            <div className="flex justify-center mt-6">
+              <Button type="default" block size="large" className="w-full">
+                <GoogleOutlined /> Log in with Google
+              </Button>
+              <Button type="default" block size="large" className="w-full ml-2">
+                Admin Login
+              </Button>
+            </div>
+
+            <p className="mt-6 text-sm text-center text-gray-600">
+              By signing in you accept the{" "}
+              <a href="#" className="text-indigo-600 hover:underline">
+                Terms of Use
+              </a>{" "}
+              and acknowledge the{" "}
+              <a href="#" className="text-indigo-600 hover:underline">
+                Privacy Statement
+              </a>
+              .
+            </p>
+            <p className="mt-2 text-sm text-center text-gray-600">
+              Don't have an account yet?{" "}
+              <Link
+                to="/auth/register"
+                className="text-indigo-600 hover:underline"
+              >
+                Register now
+              </Link>
+            </p>
           </Form>
-        </Modal>
+        </div>
       </div>
+      {/* <footer className="bg-gray-900 text-white py-5 left-0 right-0 fixed">
+        <div className="text-center mx-auto">
+          <div>
+            <p className="text-sm">
+              &copy; 2024 AD Finance Pvt Ltd. All rights reserved.
+            </p>
+            <p className="text-sm">
+              Your trusted partner in financial solutions.
+            </p>
+          </div>
+        </div>
+      </footer> */}
     </div>
   );
 };

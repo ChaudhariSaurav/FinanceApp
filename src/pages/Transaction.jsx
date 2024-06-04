@@ -15,7 +15,7 @@ import { useLocation } from "react-router-dom";
 const TransactionPage = () => {
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
-  const [date, setDate] = useState(new Date());
+  const [date, setDate] = useState(null); // Changed initial date to null
   const [form] = Form.useForm();
 
   const location = useLocation();
@@ -37,7 +37,12 @@ const TransactionPage = () => {
       axios
         .post(
           "https://e8d764d4-7deb-4a05-afb4-ebe6f8683979-00-2m4thjlwbmxjg.sisko.replit.dev/api/user/add-amount",
-          { customerId, amount, description, date },
+          {
+            customerId,
+            amount,
+            description,
+            date: date ? date.format("YYYY-MM-DD") : null,
+          }, // Formatting date properly
           { headers: { Authorization: `Bearer ${token}` } },
         )
         .then((response) => {
@@ -48,7 +53,7 @@ const TransactionPage = () => {
           });
           setAmount("");
           setDescription("");
-          setDate(new Date());
+          setDate(null); // Reset date to null
           form.resetFields();
         })
         .catch((error) => {
