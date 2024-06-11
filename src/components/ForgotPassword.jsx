@@ -2,27 +2,40 @@ import React, { useState } from "react";
 import { Form, Input, Button, notification } from "antd";
 import { MailOutlined } from "@ant-design/icons";
 import { Link } from "react-router-dom";
+import axios from "axios"; // Import axios for making HTTP requests
 
 const ForgotPasswordForm = () => {
   const [loading, setLoading] = useState(false);
 
   const onFinish = async (values) => {
     setLoading(true);
-    // Implement your forgot password logic here
+    const { email } = values; // Destructure email from form values
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      // Show success notification
-      notification.success({
-        message: "Password Reset Email Sent",
-        description: "Please check your email to reset your password.",
-      });
+      // Make POST request to the reset password API endpoint
+      const response = await axios.post(
+        "https://financeappbackend-zlsu.onrender.com//api/user/send-reset-password-email",
+        { email },
+      );
+
+      if (response.data.status === "success") {
+        // Show success notification if email was sent successfully
+        notification.success({
+          message: "Password Reset Email Sent",
+          description: "Please check your email to reset your password.",
+        });
+      } else {
+        // Show error notification if there was an issue sending the email
+        notification.error({
+          message: "Password Reset Failed",
+          description: response.data.message || "Internal Server Error.",
+        });
+      }
     } catch (error) {
       console.error("Forgot Password Error:", error);
-      // Show error notification
+      // Show error notification if there was a network error or other unexpected error
       notification.error({
         message: "Forgot Password Failed",
-        description: "An unexpected error occurred. Please try again later.",
+        description: "Internal Server Error. Please try again later.",
       });
     }
     setLoading(false);
@@ -77,7 +90,7 @@ const ForgotPasswordForm = () => {
             </Button>
           </Form.Item>
           <p className="mt-2 text-sm text-center text-gray-600">
-            Have you alrea?{" "}
+            Have you already?{" "}
             <Link to="/auth/login" className="text-indigo-600 hover:underline">
               Can't reset your password?
             </Link>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Layout, Menu, Modal } from "antd";
 import {
   HomeOutlined,
@@ -19,49 +19,43 @@ const Navbar = ({ customerId }) => {
   const [selectedMenuItem, setSelectedMenuItem] = useState("1");
   const [logoutModalVisible, setLogoutModalVisible] = useState(false);
 
-  const handleLogout = () => {
-    setLogoutModalVisible(true);
-  };
-
-  const handleConfirmLogout = () => {
-    localStorage.removeItem("token");
-    setLogoutModalVisible(false);
-  };
-
-  const handleCancelLogout = () => {
-    setLogoutModalVisible(false);
-  };
-
+  // Function to handle menu selection
   const handleMenuSelect = ({ key }) => {
     setSelectedMenuItem(key);
   };
 
+  // Function to handle logout
+  const handleLogout = () => {
+    setLogoutModalVisible(true);
+  };
+
+  // Function to confirm logout
+  const handleConfirmLogout = () => {
+    localStorage.removeItem("token");
+    window.location.href = "/login";
+    setLogoutModalVisible(false);
+  };
+
+  // Function to cancel logout
+  const handleCancelLogout = () => {
+    setLogoutModalVisible(false);
+  };
+
+  // Function to render content based on selected menu item
   const renderContent = () => {
     switch (selectedMenuItem) {
       case "1":
-        return (
-          <div>
-            <DashboardHome />
-          </div>
-        );
+        return <DashboardHome />;
       case "2":
         return <div>Document Uploads Content</div>;
       case "3":
         return <div>Customer Details Content</div>;
       case "4":
-        return (
-          <div>
-            <InstallmentTable />
-          </div>
-        );
+        return <InstallmentTable />;
       case "5":
         return <div>Loan Summary Content</div>;
       case "6":
-        return (
-          <div>
-            <TransactionPage />
-          </div>
-        );
+        return <TransactionPage />;
       case "7":
         return <div>Settings Content</div>;
       case "8":
@@ -70,6 +64,19 @@ const Navbar = ({ customerId }) => {
         return <div>Default Content</div>;
     }
   };
+
+  useEffect(() => {
+    // Check if there's a selected menu item in localStorage
+    const savedMenuItem = localStorage.getItem("selectedMenuItem");
+    if (savedMenuItem) {
+      setSelectedMenuItem(savedMenuItem);
+    }
+  }, []);
+
+  useEffect(() => {
+    // Save selected menu item to localStorage
+    localStorage.setItem("selectedMenuItem", selectedMenuItem);
+  }, [selectedMenuItem]);
 
   return (
     <Layout>
@@ -83,7 +90,7 @@ const Navbar = ({ customerId }) => {
         <Menu
           theme="dark"
           mode="inline"
-          defaultSelectedKeys={["1"]}
+          selectedKeys={[selectedMenuItem]}
           onSelect={handleMenuSelect}
           style={{ marginTop: "15px" }}
         >

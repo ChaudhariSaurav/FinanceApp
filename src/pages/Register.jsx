@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Form, Input, Button, Checkbox, notification } from "antd";
+import { Form, Input, Button, Checkbox, notification, Select } from "antd";
 import {
   UserOutlined,
   MailOutlined,
@@ -10,6 +10,8 @@ import { Modal } from "antd";
 import axios from "axios";
 import { Link } from "react-router-dom";
 
+const { Option } = Select;
+
 const RegisterForm = () => {
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
@@ -17,17 +19,18 @@ const RegisterForm = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [mobileNumber, setMobileNumber] = useState("");
+  const [role, setRole] = useState("user"); // Default role is "user"
 
   const [form] = Form.useForm();
 
   const onFinish = async (values) => {
     setLoading(true);
     const { terms, ...rest } = values;
-    const data = { ...rest, tc: true }; // Set 'tc' to true
+    const data = { ...rest, tc: true, role }; // Include 'role' in the data sent to backend
 
     try {
       const response = await axios.post(
-        "https://e8d764d4-7deb-4a05-afb4-ebe6f8683979-00-2m4thjlwbmxjg.sisko.replit.dev/api/user/register",
+        "https://financeappbackend-zlsu.onrender.com/api/user/register",
         data,
       );
 
@@ -37,10 +40,6 @@ const RegisterForm = () => {
           description: response.data.message || "Something went wrong.",
         });
       } else {
-        // notification.success({
-        //   message: "Registration Successful",
-        //   description: "You have successfully registered.",
-        // });
         form.resetFields();
         setCustomerId(response.data.customerId);
         setName(response.data.name);
@@ -48,7 +47,6 @@ const RegisterForm = () => {
         setMobileNumber(response.data.mobileNumber);
         setModalVisible(true);
       }
-      console.log("Registration response:", response.data);
     } catch (error) {
       console.error("Registration failed:", error);
       notification.error({
@@ -58,12 +56,11 @@ const RegisterForm = () => {
     }
     setLoading(false);
   };
-  // Function to handle modal close
+
   const handleModalClose = () => {
     setModalVisible(false);
   };
 
-  // Function to handle copy customer ID to clipboard
   const handleCopyCustomerId = () => {
     navigator.clipboard.writeText(customerId);
     const notificationKey = notification.success({
@@ -71,11 +68,11 @@ const RegisterForm = () => {
       description: `${customerId} copied to clipboard.`,
     });
 
-    // Set a timeout to close the notification after 5 seconds
     setTimeout(() => {
       notification.close(notificationKey);
     }, 3000);
   };
+
   return (
     <div className="flex justify-center border-2 border-black items-center h-screen bg-gray-100">
       <div className="w-full max-w-md p-6 bg-white shadow-md rounded-md">
@@ -143,12 +140,35 @@ const RegisterForm = () => {
               maxLength={10}
             />
           </Form.Item>
+
+          <Form.Item
+            name="role"
+            initialValue="user"
+            rules={[
+              {
+                required: true,
+                message: "Please select your role!",
+              },
+            ]}
+          >
+            <Select placeholder="Select your role" onChange={setRole}>
+              <Option value="user">User</Option>
+              <Option value="admin">Admin</Option>
+            </Select>
+          </Form.Item>
+
           <Form.Item
             name="password"
             rules={[
               {
                 required: true,
                 message: "Please input your password!",
+              },
+              {
+                pattern:
+                  /^(?=.*[A-Za-z])(?=.*\d)(?=.*[$@$!%*#?&])[A-Za-z\d$@$!%*#?&]{8,}$/,
+                message:
+                  "Password must be at least 8 characters long and contain at least one alphabet, one number, and one special character.",
               },
             ]}
             hasFeedback

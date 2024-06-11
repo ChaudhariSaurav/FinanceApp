@@ -36,7 +36,7 @@ const TransactionPage = () => {
 
       axios
         .post(
-          "https://e8d764d4-7deb-4a05-afb4-ebe6f8683979-00-2m4thjlwbmxjg.sisko.replit.dev/api/user/add-amount",
+          "https://financeappbackend-zlsu.onrender.com/api/user/add-amount",
           {
             customerId,
             amount,
@@ -53,7 +53,7 @@ const TransactionPage = () => {
           });
           setAmount("");
           setDescription("");
-          setDate(null); // Reset date to null
+          setDate(null);
           form.resetFields();
         })
         .catch((error) => {

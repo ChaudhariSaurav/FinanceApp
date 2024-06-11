@@ -15,7 +15,7 @@ const ForgotCustomerIdForm = () => {
       const { mobileNumber, email } = values;
       await new Promise((resolve) => setTimeout(resolve, 1000));
       const response = await axios.post(
-        "https://e8d764d4-7deb-4a05-afb4-ebe6f8683979-00-2m4thjlwbmxjg.sisko.replit.dev/api/user/get_customer",
+        "https://financeappbackend-zlsu.onrender.com/api/user/get_customer",
         {
           mobileNumber,
           email,

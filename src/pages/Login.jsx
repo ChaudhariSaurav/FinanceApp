@@ -34,12 +34,12 @@ const LoginForm = () => {
     setLoading(true);
     try {
       const response = await axios.post(
-        "https://e8d764d4-7deb-4a05-afb4-ebe6f8683979-00-2m4thjlwbmxjg.sisko.replit.dev/api/user/login",
+        "https://financeappbackend-zlsu.onrender.com/api/user/login",
         { customerId, password },
       );
 
       if (response.data.status === "failed") {
-        let errorMessage = "An unexpected error occurred.";
+        let errorMessage = "Internal Server Error";
         if (response.data.message) {
           errorMessage = response.data.message;
         }
@@ -61,12 +61,11 @@ const LoginForm = () => {
             color: "#52c41a", // Green text
           },
         });
-        window.location.href("/dashboard");
-        // Redirect to dashboard or desired page after successful login
+        window.location.href = "/dashboard";
       }
     } catch (error) {
       console.error("Login failed:", error);
-      let errorMessage = "An unexpected error occurred.";
+      let errorMessage = "Internal Server Error";
       if (
         error.response &&
         error.response.data &&
@@ -80,6 +79,10 @@ const LoginForm = () => {
       });
     }
     setLoading(false);
+  };
+
+  const adminLogin = () => {
+    window.location.href = "/admin/login";
   };
 
   return (
@@ -181,7 +184,13 @@ const LoginForm = () => {
               <Button type="default" block size="large" className="w-full">
                 <GoogleOutlined /> Log in with Google
               </Button>
-              <Button type="default" block size="large" className="w-full ml-2">
+              <Button
+                onClick={adminLogin}
+                type="default"
+                block
+                size="large"
+                className="w-full ml-2"
+              >
                 Admin Login
               </Button>
             </div>
@@ -209,18 +218,8 @@ const LoginForm = () => {
           </Form>
         </div>
       </div>
-      {/* <footer className="bg-gray-900 text-white py-5 left-0 right-0 fixed">
-        <div className="text-center mx-auto">
-          <div>
-            <p className="text-sm">
-              &copy; 2024 AD Finance Pvt Ltd. All rights reserved.
-            </p>
-            <p className="text-sm">
-              Your trusted partner in financial solutions.
-            </p>
-          </div>
-        </div>
-      </footer> */}
+
+      <p>Customer Id: ANR167415071</p>
     </div>
   );
 };

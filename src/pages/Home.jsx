@@ -11,7 +11,7 @@ const DashboardHome = () => {
       console.log(transactionHistory);
     } else {
       fetch(
-        "https://e8d764d4-7deb-4a05-afb4-ebe6f8683979-00-2m4thjlwbmxjg.sisko.replit.dev/api/user/add-amount",
+        "https://financeappbackend-zlsu.onrender.com//api/user/add-amount",
       )
         .then((response) => response.json())
         .then((data) => {
