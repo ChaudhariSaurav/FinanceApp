@@ -56,11 +56,9 @@ const Navbar = () => {
               alt="logo"
             />
           </div>
-          <Menu mode="horizontal" className="hidden sm:block">
-            <Menu.Item key="explore">Explore</Menu.Item>
-            <Menu.Item key="features">Features</Menu.Item>
-            <Menu.Item key="about">About Us</Menu.Item>
-            <Menu.Item key="contact">Contact Us</Menu.Item>
+          <Menu mode="horizontal" className="hidden sm:block ">
+            <Menu.Item key="Home">HOME</Menu.Item>
+            <Menu.Item key="Transaction">Transaction</Menu.Item>
           </Menu>
         </div>
 
@@ -73,7 +71,7 @@ const Navbar = () => {
             <MenuOutlined />
           </Button>
 
-          <Menu mode="horizontal" className="hidden sm:block">
+          <Menu mode="vertical" className="sm:block">
             <Menu.SubMenu
               title={
                 <>
@@ -106,10 +104,7 @@ const Navbar = () => {
             visible={visible}
           >
             <Menu mode="inline">
-              <Menu.Item key="explore">Explore</Menu.Item>
-              <Menu.Item key="features">Features</Menu.Item>
-              <Menu.Item key="about">About Us</Menu.Item>
-              <Menu.Item key="contact">Contact Us</Menu.Item>
+              <Menu.Item key="Home">HOME</Menu.Item>
             </Menu>
             <Menu mode="inline">
               <Menu.SubMenu
