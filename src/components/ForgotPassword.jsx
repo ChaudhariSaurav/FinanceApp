@@ -6,6 +6,7 @@ import axios from "axios"; // Import axios for making HTTP requests
 
 const ForgotPasswordForm = () => {
   const [loading, setLoading] = useState(false);
+  const [form] = Form.useForm(); // Initialize the form instance
 
   const onFinish = async (values) => {
     setLoading(true);
@@ -14,7 +15,7 @@ const ForgotPasswordForm = () => {
       // Make POST request to the reset password API endpoint
       const response = await axios.post(
         "https://financeappbackend-zlsu.onrender.com/api/user/send-reset-password-email",
-        { email },
+        { email }
       );
 
       if (response.data.status === "success") {
@@ -23,6 +24,7 @@ const ForgotPasswordForm = () => {
           message: "Password Reset Email Sent",
           description: "Please check your email to reset your password.",
         });
+        form.resetFields(); // Clear the email input field
       } else {
         // Show error notification if there was an issue sending the email
         notification.error({
@@ -50,6 +52,7 @@ const ForgotPasswordForm = () => {
           you a link to reset your password.
         </small>
         <Form
+          form={form} // Attach the form instance
           name="forgot_password_form"
           initialValues={{ remember: true }}
           onFinish={onFinish}
