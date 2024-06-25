@@ -1,11 +1,11 @@
 /* Navbar */
 
+/* Existing styles */
 .navbar {
   padding-bottom: 1px;
   border-bottom: solid 1px #e8e8e8;
-  background-color: white;
-  box-shadow: 0 3px 6px -2px rgba(0, 0, 0, 0.12),
-    0 6px 16px -11px rgba(0, 0, 0, 0.08);
+  background-color: white; 
+  box-shadow: 0 3px 6px -2px rgba(0, 0, 0, 0.12), 0 6px 16px -11px rgba(0, 0, 0, 0.08);
   position: sticky;
   top: 0;
   margin-bottom: 20px;
@@ -15,51 +15,53 @@
 .nav-header {
   background-color: white;
   border-bottom: 0;
-  padding: 0 4px 0 20px;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
 }
 
 .logo {
   width: 200px;
-  float: left;
+  margin-right: 20px;
 }
 
-.logo a {
-  display: inline-block;
-  font-size: 20px;
-  text-transform: capitalize;
+.logo img {
+  width: 100%;
+  height: auto;
 }
 
 .navbar-menu {
-  width: calc(100% - 200px);
-  float: left;
-}
-.navbar-menu .ant-layout-header {
-  padding: 0 10px;
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .navbar-menu .ant-menu-horizontal {
-  border-bottom: 0;
+  border-bottom: none;
 }
 
 .navbar-menu .ant-menu-item {
-  padding-bottom: 0px;
-}
-
-.navbar-menu .leftMenu {
-  float: left;
-}
-
-.navbar-menu .rightMenu {
-  float: right;
+  padding: 0 15px;
 }
 
 .menuButton {
-  float: right;
   height: 32px;
   padding: 6px;
-  margin-top: 14px;
   display: none;
   background: none;
+}
+
+.right-menu {
+  display: flex;
+  align-items: center;
+}
+
+.right-menu .ant-avatar {
+  margin-right: 10px;
+}
+
+.username {
   margin-right: 10px;
 }
 
@@ -81,15 +83,9 @@
   border-bottom-color: transparent;
 }
 
-.username {
-  display: none;
-  margin-left: 8px;
-}
-
 @media (max-width: 768px) {
   .menuButton {
     display: block;
-    margin-right: 10px;
   }
 
   .leftMenu,
@@ -97,17 +93,21 @@
     display: none;
   }
 
-  .logo a {
-    margin-left: -10px;
+  .logo {
+    margin-right: 0;
   }
 
-  .ant-drawer-title > .brand-font {
-    margin-bottom: 0;
+  .logo img {
+    margin-left: -10px;
   }
 
   .username {
     display: inline-block;
   }
+}
+
+.ant-layout-header {
+  background: white;
 }
 
 /* Navbar End */

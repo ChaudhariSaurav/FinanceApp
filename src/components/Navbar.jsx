@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Layout, Button, Drawer, Menu, Avatar, Modal } from "antd";
 import {
   MenuOutlined,
@@ -8,137 +8,141 @@ import {
 } from "@ant-design/icons";
 import { useLocation } from "react-router-dom";
 import "./Navbar.css";
+const { Header } = Layout;
 
 const Navbar = () => {
   const [visible, setVisible] = useState(false);
+  const [logoutModalVisible, setLogoutModalVisible] = useState(false);
   const location = useLocation();
 
   const showDrawer = () => {
     setVisible(!visible);
   };
 
-  useEffect(() => {
-    setVisible(false);
-  }, [location]);
-
-  // Extracting customerId from location.state or localStorage
-  const { customerId } = location.state || {};
-  const localStorageCustomerId = localStorage.getItem("customerId");
-
   const handleLogout = () => {
-    setLogoutModalVisible(true);
+    const token = localStorage.getItem("token");
+    const customerId = localStorage.getItem("Customer Id");
+
+    if (!token || !customerId) {
+      localStorage.clear();
+      window.location.href = "/auth/login";
+    } else {
+      setLogoutModalVisible(true);
+    }
   };
 
   const handleConfirmLogout = () => {
-    // Clear token from localStorage
-    localStorage.removeItem("token");
-    // Redirect to login page using window.location.href
-    window.location.href = "/login";
-    // Close the logout modal
+    localStorage.clear();
     setLogoutModalVisible(false);
+    window.location.href = "/auth/login";
   };
 
   const handleCancelLogout = () => {
     setLogoutModalVisible(false);
   };
 
-  const [logoutModalVisible, setLogoutModalVisible] = useState(false);
+  // Extracting customerId from location.state or localStorage
+  const { CustomerId } = location.state || {};
+  const localStorageCustomerId = localStorage.getItem("Customer Id");
 
   return (
-    <nav className="navbar">
-      <Layout>
-        <Layout.Header className="nav-header">
-          <div className="logo">
-            <h3 className="brand-font">
-              <img
-                style={{ margin: "15px" }}
-                src="https://ik.imagekit.io/laxmifinance/adfinancelogo.png?updatedAt=1717456339448"
-                alt="logo"
-              ></img>
-            </h3>
+    <Layout className="ant-layout-header shadow-md">
+      <Header className="flex items-center justify-between px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center">
+          <div className="logo mr-4">
+            <img
+              className="h-12"
+              src="https://ik.imagekit.io/laxmifinance/adfinancelogo.png?updatedAt=1717456339448"
+              alt="logo"
+            />
           </div>
-          <div className="navbar-menu">
-            <div className="leftMenu">
-              <Menu mode={"horizontal"}>
-                <Menu.Item key="explore">Explore</Menu.Item>
-                <Menu.Item key="features">Features</Menu.Item>
-                <Menu.Item key="about">About Us</Menu.Item>
-                <Menu.Item key="contact">Contact Us</Menu.Item>
-              </Menu>
-            </div>
+          <Menu mode="horizontal" className="hidden sm:block">
+            <Menu.Item key="explore">Explore</Menu.Item>
+            <Menu.Item key="features">Features</Menu.Item>
+            <Menu.Item key="about">About Us</Menu.Item>
+            <Menu.Item key="contact">Contact Us</Menu.Item>
+          </Menu>
+        </div>
 
-            <Button className="menuButton" type="text" onClick={showDrawer}>
-              <MenuOutlined />
-            </Button>
-            <div className="rightMenu">
-              <Menu mode={"horizontal"}>
-                <Menu.SubMenu
-                  title={
-                    <>
-                      <Avatar icon={<UserOutlined />} />
-                      <span className="username">
-                        {customerId
-                          ? `Customer ID: ${customerId}`
-                          : `Customer ID: ${localStorageCustomerId}`}
-                      </span>
-                    </>
-                  }
-                >
-                  <Menu.Item key="project">
-                    <CodeOutlined /> Projects
-                  </Menu.Item>
-                  <Menu.Item key="about-us">
-                    <UserOutlined /> Profile
-                  </Menu.Item>
-                  <Menu.Item key="log-out" onClick={handleLogout}>
-                    <LogoutOutlined /> Logout
-                  </Menu.Item>
-                </Menu.SubMenu>
-              </Menu>
-            </div>
+        <div className="flex items-center">
+          <Button
+            className="menu-button block lg:hidden"
+            type="text"
+            onClick={showDrawer}
+          >
+            <MenuOutlined />
+          </Button>
 
-            <Drawer
-              title={"Brand Here"}
-              placement="right"
-              closable={true}
-              onClose={showDrawer}
-              visible={visible}
-              style={{ zIndex: 99999 }}
+          <Menu mode="horizontal" className="hidden sm:block">
+            <Menu.SubMenu
+              title={
+                <>
+                  <Avatar icon={<UserOutlined />} />
+                  <span className="ml-2">
+                    {CustomerId
+                      ? `Customer ID: ${CustomerId}`
+                      : `Customer ID: ${localStorageCustomerId}`}
+                  </span>
+                </>
+              }
             >
-              <Menu mode={"inline"}>
-                <Menu.Item key="explore">Explore</Menu.Item>
-                <Menu.Item key="features">Features</Menu.Item>
-                <Menu.Item key="about">About Us</Menu.Item>
-                <Menu.Item key="contact">Contact Us</Menu.Item>
-              </Menu>
-              <Menu mode={"inline"}>
-                <Menu.SubMenu
-                  title={
-                    <>
-                      <Avatar icon={<UserOutlined />} />
-                      <span className="username">
-                        {customerId
-                          ? `Customer ID: ${customerId}`
-                          : `Customer ID: ${localStorageCustomerId}`}
-                      </span>
-                    </>
-                  }
-                >
-                  <Menu.Item key="project">
-                    <CodeOutlined /> Projects
-                  </Menu.Item>
-                  <Menu.Item key="about-us">
-                    <UserOutlined /> Profile
-                  </Menu.Item>
-                  <Menu.Item key="log-out" onClick={handleLogout}>
-                    <LogoutOutlined /> Logout
-                  </Menu.Item>
-                </Menu.SubMenu>
-              </Menu>
-            </Drawer>
-          </div>
-        </Layout.Header>
-      </Layout>
+              <Menu.Item key="project">
+                <CodeOutlined /> Projects
+              </Menu.Item>
+              <Menu.Item key="about-us">
+                <UserOutlined /> Profile
+              </Menu.Item>
+              <Menu.Item key="log-out" onClick={handleLogout}>
+                <LogoutOutlined /> Logout
+              </Menu.Item>
+            </Menu.SubMenu>
+          </Menu>
+
+          <Drawer
+            title="AD FINANCE"
+            placement="right"
+            closable
+            onClose={showDrawer}
+            visible={visible}
+          >
+            <Menu mode="inline">
+              <Menu.Item key="explore">Explore</Menu.Item>
+              <Menu.Item key="features">Features</Menu.Item>
+              <Menu.Item key="about">About Us</Menu.Item>
+              <Menu.Item key="contact">Contact Us</Menu.Item>
+            </Menu>
+            <Menu mode="inline">
+              <Menu.SubMenu
+                title={
+                  <>
+                    <Avatar icon={<UserOutlined />} />
+                    <span className="ml-2">
+                      {CustomerId
+                        ? `Customer ID: ${CustomerId}`
+                        : `Customer ID: ${localStorageCustomerId}`}
+                    </span>
+                  </>
+                }
+              >
+                <Menu.Item key="about-us">
+                  <UserOutlined /> Profile
+                </Menu.Item>
+                <Menu.Item key="log-out" onClick={handleLogout}>
+                  <LogoutOutlined /> Logout
+                </Menu.Item>
+              </Menu.SubMenu>
+            </Menu>
+          </Drawer>
+
+          <Button
+            className="menu-button hidden sm:block"
+            type="text"
+            onClick={showDrawer}
+          >
+            <MenuOutlined />
+          </Button>
+        </div>
+      </Header>
 
       <Modal
         title="Confirm Logout"
@@ -148,7 +152,7 @@ const Navbar = () => {
       >
         <p>Are you sure you want to logout?</p>
       </Modal>
-    </nav>
+    </Layout>
   );
 };
 

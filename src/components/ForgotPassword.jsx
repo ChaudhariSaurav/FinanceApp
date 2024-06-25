@@ -15,7 +15,7 @@ const ForgotPasswordForm = () => {
       // Make POST request to the reset password API endpoint
       const response = await axios.post(
         "https://financeappbackend-zlsu.onrender.com/api/user/send-reset-password-email",
-        { email }
+        { email },
       );
 
       if (response.data.status === "success") {
