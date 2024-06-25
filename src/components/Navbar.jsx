@@ -1,134 +1,145 @@
-import React, { useState, useEffect } from "react";
-import { Layout, Menu, Modal } from "antd";
+import React, { useEffect, useState } from "react";
+import { Layout, Button, Drawer, Menu, Avatar, Modal } from "antd";
 import {
-  HomeOutlined,
-  FileOutlined,
-  SettingOutlined,
-  UsergroupAddOutlined,
-  LineChartOutlined,
+  MenuOutlined,
+  UserOutlined,
+  CodeOutlined,
   LogoutOutlined,
-  WalletOutlined,
 } from "@ant-design/icons";
-import DashboardHome from "../pages/Home";
-import TransactionPage from "../pages/Transaction";
-import InstallmentTable from "../pages/Installment";
+import { useLocation } from "react-router-dom";
+import "./Navbar.css";
 
-const { Header, Sider, Content } = Layout;
+const Navbar = () => {
+  const [visible, setVisible] = useState(false);
+  const location = useLocation();
 
-const Navbar = ({ customerId }) => {
-  const [selectedMenuItem, setSelectedMenuItem] = useState("1");
-  const [logoutModalVisible, setLogoutModalVisible] = useState(false);
-
-  // Function to handle menu selection
-  const handleMenuSelect = ({ key }) => {
-    setSelectedMenuItem(key);
+  const showDrawer = () => {
+    setVisible(!visible);
   };
 
-  // Function to handle logout
+  useEffect(() => {
+    setVisible(false);
+  }, [location]);
+
+  // Extracting customerId from location.state or localStorage
+  const { customerId } = location.state || {};
+  const localStorageCustomerId = localStorage.getItem("customerId");
+
   const handleLogout = () => {
     setLogoutModalVisible(true);
   };
 
-  // Function to confirm logout
   const handleConfirmLogout = () => {
+    // Clear token from localStorage
     localStorage.removeItem("token");
+    // Redirect to login page using window.location.href
     window.location.href = "/login";
+    // Close the logout modal
     setLogoutModalVisible(false);
   };
 
-  // Function to cancel logout
   const handleCancelLogout = () => {
     setLogoutModalVisible(false);
   };
 
-  // Function to render content based on selected menu item
-  const renderContent = () => {
-    switch (selectedMenuItem) {
-      case "1":
-        return <DashboardHome />;
-      case "2":
-        return <div>Document Uploads Content</div>;
-      case "3":
-        return <div>Customer Details Content</div>;
-      case "4":
-        return <InstallmentTable />;
-      case "5":
-        return <div>Loan Summary Content</div>;
-      case "6":
-        return <TransactionPage />;
-      case "7":
-        return <div>Settings Content</div>;
-      case "8":
-        return <div>Logout Content</div>;
-      default:
-        return <div>Default Content</div>;
-    }
-  };
-
-  useEffect(() => {
-    // Check if there's a selected menu item in localStorage
-    const savedMenuItem = localStorage.getItem("selectedMenuItem");
-    if (savedMenuItem) {
-      setSelectedMenuItem(savedMenuItem);
-    }
-  }, []);
-
-  useEffect(() => {
-    // Save selected menu item to localStorage
-    localStorage.setItem("selectedMenuItem", selectedMenuItem);
-  }, [selectedMenuItem]);
+  const [logoutModalVisible, setLogoutModalVisible] = useState(false);
 
   return (
-    <Layout>
-      <Sider
-        breakpoint="lg"
-        collapsedWidth="0"
-        theme="dark"
-        style={{ minHeight: "100vh" }}
-      >
-        <div className="p-4 text-white font-bold">JS GROUP'S</div>
-        <Menu
-          theme="dark"
-          mode="inline"
-          selectedKeys={[selectedMenuItem]}
-          onSelect={handleMenuSelect}
-          style={{ marginTop: "15px" }}
-        >
-          <Menu.Item key="1" icon={<HomeOutlined />}>
-            Home
-          </Menu.Item>
-          <Menu.Item key="2" icon={<FileOutlined />}>
-            Document Uploads
-          </Menu.Item>
-          <Menu.Item key="3" icon={<UsergroupAddOutlined />}>
-            Customer Details
-          </Menu.Item>
-          <Menu.Item key="4" icon={<LineChartOutlined />}>
-            Installment
-          </Menu.Item>
-          <Menu.Item key="5" icon={<SettingOutlined />}>
-            Loan Summary
-          </Menu.Item>
-          <Menu.Item key="6" icon={<WalletOutlined />}>
-            Transaction
-          </Menu.Item>
-          <Menu.Item key="7" icon={<SettingOutlined />}>
-            Settings
-          </Menu.Item>
-          <Menu.Item key="8" onClick={handleLogout} icon={<LogoutOutlined />}>
-            Logout
-          </Menu.Item>
-        </Menu>
-      </Sider>
+    <nav className="navbar">
       <Layout>
-        <Header className="bg-gray-900 shadow-sm px-4 py-3 flex justify-between items-center">
-          <div className="text-white font-bold"></div>
-          <div className="text-white">
-            {customerId && <p>Customer ID: {customerId}</p>}
+        <Layout.Header className="nav-header">
+          <div className="logo">
+            <h3 className="brand-font">
+              <img
+                style={{ margin: "15px" }}
+                src="https://ik.imagekit.io/laxmifinance/adfinancelogo.png?updatedAt=1717456339448"
+                alt="logo"
+              ></img>
+            </h3>
           </div>
-        </Header>
-        <Content className="p-4">{renderContent()}</Content>
+          <div className="navbar-menu">
+            <div className="leftMenu">
+              <Menu mode={"horizontal"}>
+                <Menu.Item key="explore">Explore</Menu.Item>
+                <Menu.Item key="features">Features</Menu.Item>
+                <Menu.Item key="about">About Us</Menu.Item>
+                <Menu.Item key="contact">Contact Us</Menu.Item>
+              </Menu>
+            </div>
+
+            <Button className="menuButton" type="text" onClick={showDrawer}>
+              <MenuOutlined />
+            </Button>
+            <div className="rightMenu">
+              <Menu mode={"horizontal"}>
+                <Menu.SubMenu
+                  title={
+                    <>
+                      <Avatar icon={<UserOutlined />} />
+                      <span className="username">
+                        {customerId
+                          ? `Customer ID: ${customerId}`
+                          : `Customer ID: ${localStorageCustomerId}`}
+                      </span>
+                    </>
+                  }
+                >
+                  <Menu.Item key="project">
+                    <CodeOutlined /> Projects
+                  </Menu.Item>
+                  <Menu.Item key="about-us">
+                    <UserOutlined /> Profile
+                  </Menu.Item>
+                  <Menu.Item key="log-out" onClick={handleLogout}>
+                    <LogoutOutlined /> Logout
+                  </Menu.Item>
+                </Menu.SubMenu>
+              </Menu>
+            </div>
+
+            <Drawer
+              title={"Brand Here"}
+              placement="right"
+              closable={true}
+              onClose={showDrawer}
+              visible={visible}
+              style={{ zIndex: 99999 }}
+            >
+              <Menu mode={"inline"}>
+                <Menu.Item key="explore">Explore</Menu.Item>
+                <Menu.Item key="features">Features</Menu.Item>
+                <Menu.Item key="about">About Us</Menu.Item>
+                <Menu.Item key="contact">Contact Us</Menu.Item>
+              </Menu>
+              <Menu mode={"inline"}>
+                <Menu.SubMenu
+                  title={
+                    <>
+                      <Avatar icon={<UserOutlined />} />
+                      <span className="username">
+                        {customerId
+                          ? `Customer ID: ${customerId}`
+                          : `Customer ID: ${localStorageCustomerId}`}
+                      </span>
+                    </>
+                  }
+                >
+                  <Menu.Item key="project">
+                    <CodeOutlined /> Projects
+                  </Menu.Item>
+                  <Menu.Item key="about-us">
+                    <UserOutlined /> Profile
+                  </Menu.Item>
+                  <Menu.Item key="log-out" onClick={handleLogout}>
+                    <LogoutOutlined /> Logout
+                  </Menu.Item>
+                </Menu.SubMenu>
+              </Menu>
+            </Drawer>
+          </div>
+        </Layout.Header>
       </Layout>
+
       <Modal
         title="Confirm Logout"
         visible={logoutModalVisible}
@@ -137,7 +148,7 @@ const Navbar = ({ customerId }) => {
       >
         <p>Are you sure you want to logout?</p>
       </Modal>
-    </Layout>
+    </nav>
   );
 };
 

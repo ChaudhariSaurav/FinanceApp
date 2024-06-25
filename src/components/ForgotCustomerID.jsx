@@ -7,7 +7,7 @@ import axios from "axios";
 const ForgotCustomerIdForm = () => {
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
-  const [visible, setVisible] = useState(false); // Added state for visibility
+  const [visible, setVisible] = useState(false);
 
   const onFinish = async (values) => {
     setLoading(true);
