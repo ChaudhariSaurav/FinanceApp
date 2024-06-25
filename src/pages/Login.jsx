@@ -51,7 +51,7 @@ const LoginForm = () => {
         console.log("Login successful:", response.data);
         const token = response.data.token;
         localStorage.setItem("token", token);
-        localStorage.setItem("users", users);
+        localStorage.setItem("Customer Id", customerId);
         notification.success({
           message: "Login Success!",
           description: response.data?.message,
