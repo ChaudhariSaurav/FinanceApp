@@ -7,7 +7,6 @@ import {
   LogoutOutlined,
 } from "@ant-design/icons";
 import { useLocation } from "react-router-dom";
-import "./Navbar.css";
 const { Header } = Layout;
 
 const Navbar = () => {
@@ -41,37 +40,37 @@ const Navbar = () => {
     setLogoutModalVisible(false);
   };
 
+  const gotoProfile = () => {
+    window.location.href = "/profile";
+  };
+
   // Extracting customerId from location.state or localStorage
   const { CustomerId } = location.state || {};
   const localStorageCustomerId = localStorage.getItem("Customer Id");
 
   return (
-    <Layout className="ant-layout-header shadow-md">
-      <Header className="flex items-center justify-between px-4 sm:px-6 lg:px-8">
+    <Layout className="shadow-md">
+      <Header className="flex items-center justify-between px-4 sm:px-6 lg:px-8 bg-white">
         <div className="flex items-center">
-          <div className="logo mr-4">
+          <div className="mr-4">
             <img
               className="h-12"
               src="https://ik.imagekit.io/laxmifinance/adfinancelogo.png?updatedAt=1717456339448"
               alt="logo"
             />
           </div>
-          <Menu mode="horizontal" className="hidden sm:block ">
+          <Menu mode="horizontal" className="hidden sm:flex">
             <Menu.Item key="Home">HOME</Menu.Item>
             <Menu.Item key="Transaction">Transaction</Menu.Item>
           </Menu>
         </div>
 
         <div className="flex items-center">
-          <Button
-            className="menu-button block lg:hidden"
-            type="text"
-            onClick={showDrawer}
-          >
+          <Button className="block lg:hidden" type="text" onClick={showDrawer}>
             <MenuOutlined />
           </Button>
 
-          <Menu mode="vertical" className="sm:block">
+          <Menu mode="horizontal" className="hidden lg:flex">
             <Menu.SubMenu
               title={
                 <>
@@ -87,7 +86,7 @@ const Navbar = () => {
               <Menu.Item key="project">
                 <CodeOutlined /> Projects
               </Menu.Item>
-              <Menu.Item key="about-us">
+              <Menu.Item key="about-us" onClick={gotoProfile}>
                 <UserOutlined /> Profile
               </Menu.Item>
               <Menu.Item key="log-out" onClick={handleLogout}>
@@ -105,8 +104,7 @@ const Navbar = () => {
           >
             <Menu mode="inline">
               <Menu.Item key="Home">HOME</Menu.Item>
-            </Menu>
-            <Menu mode="inline">
+              <Menu.Item key="Transaction">Transaction</Menu.Item>
               <Menu.SubMenu
                 title={
                   <>
@@ -119,6 +117,9 @@ const Navbar = () => {
                   </>
                 }
               >
+                <Menu.Item key="project">
+                  <CodeOutlined /> Projects
+                </Menu.Item>
                 <Menu.Item key="about-us">
                   <UserOutlined /> Profile
                 </Menu.Item>
@@ -128,14 +129,6 @@ const Navbar = () => {
               </Menu.SubMenu>
             </Menu>
           </Drawer>
-
-          <Button
-            className="menu-button hidden sm:block"
-            type="text"
-            onClick={showDrawer}
-          >
-            <MenuOutlined />
-          </Button>
         </div>
       </Header>
 

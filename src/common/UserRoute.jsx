@@ -10,7 +10,6 @@ function UserRoute() {
     <BrowserRouter>
       <Routes>
         {token ? (
-          // If token exists, render valid authenticated routes
           <>
             {ValidAuthroutes.map((route, index) => (
               <Route key={index} path={route.path} element={route.element} />

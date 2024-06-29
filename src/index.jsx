@@ -6,8 +6,8 @@ import UserRoute from "./common/UserRoute";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
 	<React.StrictMode>
-		  <Layout>
-      <UserRoute />
-    </Layout>
+		<Layout>
+			<UserRoute />
+		</Layout>
 	</React.StrictMode>,
 );

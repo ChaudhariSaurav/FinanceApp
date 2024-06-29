@@ -74,10 +74,11 @@ const RegisterForm = () => {
   };
 
   return (
-    <div className="flex justify-center border-2 border-black items-center h-screen bg-gray-100">
+    <div className="flex border justify-center border-2 border-black items-center h-screen bg-gray-100">
       <div className="w-full max-w-md p-6 bg-white shadow-md rounded-md">
-        <h1 className="text-center text-2xl mb-4">Sign up into JR GROUP'S</h1>
-        <span className="text-left mb-6 block">
+        <h1 className="text-center text-2xl mb-4">Sign up into AD FINANCE</h1>
+
+        <span className="text-left mb-6 block text-left mb-6 block bg-[#fff2f0] border border-[#ffccc7] p-2 rounded-md">
           Please fill in the form to get started with your account.
         </span>
         <Form

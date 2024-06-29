@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Form, Input, Button, notification } from "antd";
+import { Form, Input, Button, notification, Alert } from "antd";
 import { PhoneOutlined, MailOutlined } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 import axios from "axios";
@@ -8,6 +8,7 @@ const ForgotCustomerIdForm = () => {
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
   const [visible, setVisible] = useState(false);
+  const [AlertMsg, setAlertMsg] = useState("");
 
   const onFinish = async (values) => {
     setLoading(true);
@@ -22,19 +23,12 @@ const ForgotCustomerIdForm = () => {
         },
       );
       if (response.data.customerId) {
-        notification.success({
-          message: "Success",
-          description: (
-            <div>
-              <p>
-                <strong>Customer ID:</strong> {response.data.customerId}
-              </p>
-            </div>
-          ),
-        });
-        setVisible(false);
+        setAlertMsg(`Your Customer ID is: ${response.data.customerId}`);
+        setVisible(true);
         form.resetFields();
       } else {
+        setAlertMsg("Customer ID not found.");
+        setVisible(true);
         notification.error({
           message: "Forgot Customer ID",
           description: "Customer ID not found.",
@@ -42,6 +36,8 @@ const ForgotCustomerIdForm = () => {
       }
     } catch (error) {
       console.error("Forgot Customer ID Error:", error);
+      setAlertMsg("You have entered wrong details!");
+      setVisible(true);
       notification.error({
         message: "Forgot Customer ID",
         description: "You have entered wrong details! ",
@@ -54,6 +50,9 @@ const ForgotCustomerIdForm = () => {
     <div className="flex justify-center items-center h-screen bg-gray-100">
       <div className="w-full max-w-md p-6 bg-white shadow-md rounded-md">
         <h1 className="text-center text-2xl mb-6">Forgot Customer ID</h1>
+        <span class="text-left mb-6 block bg-[#fff2f0] border border-[#ffccc7] p-2 rounded-md text-center">
+          Free to feel here retrieve your Customer ID.
+        </span>
         <Form
           form={form}
           name="forgot_customer_id_form"
@@ -113,6 +112,7 @@ const ForgotCustomerIdForm = () => {
             </Button>
           </Form.Item>
         </Form>
+        {visible && <Alert message={AlertMsg} type="error" showIcon />}
         <p className="mt-2 text-sm text-center text-gray-600">
           Have you already?{" "}
           <Link to="/auth/login" className="text-indigo-600 hover:underline">

@@ -92,12 +92,16 @@ const LoginForm = () => {
           src="https://ik.imagekit.io/laxmifinance/adfinancelogo.png?updatedAt=1717456339448"
           alt="AD FINANCE"
           className="h-10 w-auto mb-8"
-          style={{ height: "100px", marginTop: "50px" }}
+          style={{ height: "60px", marginTop: "60px" }}
         />
       </div>
       <div className="flex justify-center">
         <div className="w-full max-w-md p-6 bg-white shadow-md rounded-md">
           <h1 className="text-center text-2xl mb-6">Sign in to your account</h1>
+
+          <small className="text-left mb-6 block bg-[#fff2f0] border border-[#ffccc7] p-2 rounded-md">
+            Welcome Back! &nbsp; Please enter your details to login.
+          </small>
           <Form
             name="normal_login"
             className="login-form"
@@ -181,9 +185,6 @@ const LoginForm = () => {
             </div>
 
             <div className="flex justify-center mt-6">
-              <Button type="default" block size="large" className="w-full">
-                <GoogleOutlined /> Log in with Google
-              </Button>
               <Button
                 onClick={adminLogin}
                 type="default"

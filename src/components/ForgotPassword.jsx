@@ -22,7 +22,7 @@ const ForgotPasswordForm = () => {
           message: "Password Reset Successful",
           description: "Your password has been reset successfully.",
         });
-        form.resetFields(); // Clear the form fields
+        form.resetFields();
       } else {
         notification.error({
           message: "Password Reset Failed",
@@ -43,7 +43,8 @@ const ForgotPasswordForm = () => {
     <div className="flex justify-center items-center h-screen bg-gray-100">
       <div className="w-full max-w-md p-6 bg-white shadow-md rounded-md">
         <h1 className="text-center text-2xl mb-6">Reset your password</h1>
-        <small>
+
+        <small className="text-left mb-6 block bg-[#fff2f0] border border-[#ffccc7] p-2 rounded-md">
           Enter the email address associated with your account, and your new
           password, to reset your password.
         </small>
