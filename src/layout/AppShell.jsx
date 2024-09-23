@@ -4,7 +4,7 @@ import Header from '../components/header';
 import Sidebar from '../components/Sidebar';
 
 
-const Appshell = ({ children }) => {
+const AppLayout = ({ children }) => {
   const { isOpen, onToggle } = useDisclosure();
   const bgColor = useColorModeValue('gray.100', 'gray.800');
   const contentBgColor = useColorModeValue('white', 'gray.700');
@@ -38,4 +38,4 @@ const Appshell = ({ children }) => {
   );
 };
 
-export default Appshell;
+export default AppLayout;

@@ -7,7 +7,7 @@ const useDataStore = create(
             isLoggedIn: false,
             data: [],
             user: null,
-            setUser: (userData) => set({ user: userData }),
+            setUser: (userData) => set({ user: userData,isLoggedIn: true }),
             clearUser: () => set({ user: null }),
         }),
         {
