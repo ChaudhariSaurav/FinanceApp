@@ -36,7 +36,7 @@ const RegistrationForm = () => {
     dateOfBirth: "",
     mobile: "",
     photo: null,
-    loanType: "E Type",
+    loanType: "E",
     totalEmiMonths: "12",
     loanValue: "10000",
   });
@@ -144,7 +144,7 @@ const RegistrationForm = () => {
 
       toast({
         title: "Registration Successful",
-        description: `Welcome, ${response.user.name}!`,
+        description: `Welcome, ${response.user.name}- ${response.customerId}!`,
         status: "success",
         duration: 5000,
         isClosable: true,
@@ -289,11 +289,11 @@ const RegistrationForm = () => {
                     value={formData.loanType}
                     onChange={handleChange}
                   >
-                    <option value="E">E Type - Rs 10,000</option>
-                    <option value="J">J Type - Rs 20,000</option>
-                    <option value="O">O Type - Rs 30,000</option>
-                    <option value="T">T Type - Rs 40,000</option>
-                    <option value="Y">Y Type - Rs 50,000</option>
+                    <option value="E">E - Rs 10,000</option>
+                    <option value="J">J - Rs 20,000</option>
+                    <option value="O">O - Rs 30,000</option>
+                    <option value="T">T - Rs 40,000</option>
+                    <option value="Y">Y - Rs 50,000</option>
                   </Select>
                 </FormControl>
               </GridItem>

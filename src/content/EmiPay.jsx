@@ -1,0 +1,201 @@
+import React, { useState, useEffect } from "react";
+import {
+  Box,
+  Heading,
+  Table,
+  Thead,
+  Tbody,
+  Tr,
+  Th,
+  Td,
+  Button,
+  Input,
+  HStack,
+  Select,
+  Icon,
+  Badge,
+  Spinner,
+  Text,
+} from "@chakra-ui/react";
+import { FiSearch } from "react-icons/fi";
+import { LuEye } from "react-icons/lu";
+import AppLayout from "../layout/AppShell";
+import Pagination from "../components/pagination";
+import { useNavigate } from "react-router-dom";
+import { ref, get } from "firebase/database";
+import { database } from "../config/firebase";
+import useDataStore from "../zustand/userDataStore";
+
+const monthNames = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"
+];
+
+const InstallmentPage = () => {
+  const navigate = useNavigate();
+  const user = useDataStore((state) => state.user);
+  const [installments, setInstallments] = useState([]);
+  const [statusFilter, setStatusFilter] = useState("All");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const itemsPerPage = 5;
+
+  useEffect(() => {
+    const fetchInstallments = async () => {
+      if (!user) return;
+      setLoading(true);
+
+      const installmentRef = ref(database, `installments/${user.uid}`);
+      const snapshot = await get(installmentRef);
+
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        const installmentArray = Object.keys(data).map(key => ({
+          ...data[key],
+          month: parseInt(key, 10),
+        }));
+        setInstallments(installmentArray);
+      } else {
+        setInstallments([]);
+      }
+
+      setLoading(false);
+    };
+
+    fetchInstallments();
+  }, [user]);
+
+  const filteredData = installments.filter((installment) => {
+    const matchesStatus =
+      statusFilter === "All" || installment.status === statusFilter;
+    const matchesSearch = monthNames[installment.month].toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesStatus && matchesSearch;
+  });
+
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  const paginatedData = filteredData.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const options = { month: '2-digit', day: '2-digit', year: 'numeric' };
+    return date.toLocaleDateString(undefined, options);
+  };
+
+  const getStatusBadge = (status) => {
+    switch (status) {
+      case "Paid":
+        return <Badge colorScheme="green">{status}</Badge>;
+      case "Pending":
+        return <Badge colorScheme="orange">{status}</Badge>;
+      case "Upcoming":
+        return <Badge colorScheme="red">{status}</Badge>;
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <AppLayout>
+      <Box p={4}>
+        <Heading mb={4}>Installment Management</Heading>
+        <HStack mb={4}>
+          <Select
+            placeholder="Filter by status"
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
+            <option value="All">All</option>
+            <option value="Paid">Paid</option>
+            <option value="Pending">Pending</option>
+            <option value="Upcoming">Upcoming</option>
+          </Select>
+          <HStack position="relative">
+            <Input
+              placeholder="Search by month..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              pr="4.5rem"
+            />
+            <Icon as={FiSearch} position="absolute" right="1.5rem" />
+          </HStack>
+        </HStack>
+
+        {loading ? (
+          <Box textAlign="center" my={4}>
+            <Spinner size="xl" />
+            <Text mt={2}>Please wait...</Text>
+          </Box>
+        ) : (
+          <>
+            <Box
+              overflowX="auto"
+              maxH="60vh"
+              borderWidth="1px"
+              borderRadius="md"
+              mb={4}
+            >
+              <Table variant="simple">
+                <Thead>
+                  <Tr>
+                    <Th>Installment Month</Th>
+                    <Th>Amount Due</Th>
+                    <Th>Status</Th>
+                    <Th>Due Date</Th>
+                    <Th>Action</Th>
+                  </Tr>
+                </Thead>
+                <Tbody>
+                  {paginatedData.map((installment) => {
+                    const monthName = (installment.month >= 0 && installment.month <= 11)
+                      ? monthNames[installment.month] // Directly use installment.month
+                      : "Invalid Month"; // Safeguard for invalid months
+
+                    return (
+                      <Tr key={installment.month}>
+                        <Td>{`${monthName}`}</Td>
+                        <Td>
+                          {installment.status === "Paid" 
+                            ? installment.amountPaid 
+                            : installment.amount.toFixed(2)}
+                        </Td>
+                        <Td>{getStatusBadge(installment.status)}</Td>
+                        <Td>{formatDate(installment.dueDate || installment.paymentDate)}</Td>
+                        <Td>
+                          <Button
+                            onClick={() => {
+                              const month = installment.month;
+                              if (month !== undefined) {
+                                navigate(`/emi/details/${month}`);
+                              } else {
+                                console.error("Installment month is undefined");
+                              }
+                            }}
+                            variant="outline"
+                            colorScheme="blue"
+                            leftIcon={<LuEye />}
+                          >
+                            View
+                          </Button>
+                        </Td>
+                      </Tr>
+                    );
+                  })}
+                </Tbody>
+              </Table>
+            </Box>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          </>
+        )}
+      </Box>
+    </AppLayout>
+  );
+};
+
+export default InstallmentPage;

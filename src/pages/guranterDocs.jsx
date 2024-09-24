@@ -12,6 +12,7 @@ import {
   Text,
   Select,
   SimpleGrid,
+  Spinner,
 } from "@chakra-ui/react";
 import { useDropzone } from "react-dropzone";
 import { handleUploadFiles } from "../service/auth";
@@ -26,7 +27,7 @@ const GuarantorUpload = () => {
     relationship: "",
   });
   const [files, setFiles] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false); // Loading state
   const toast = useToast();
   const { user } = useDataStore();
 
@@ -94,6 +95,8 @@ const GuarantorUpload = () => {
       return;
     }
 
+    setLoading(true); // Start loading
+
     try {
       await handleUploadFiles(files, user, 'guarantor', guarantorDetails);
       toast({
@@ -113,6 +116,8 @@ const GuarantorUpload = () => {
         duration: 5000,
         isClosable: true,
       });
+    } finally {
+      setLoading(false); // Stop loading
     }
   };
 
@@ -194,15 +199,16 @@ const GuarantorUpload = () => {
             </VStack>
           )}
 
-          <Button colorScheme="blue" onClick={handleSubmit}>
+          <Button colorScheme="blue" onClick={handleSubmit} isLoading={loading} loadingText="Uploading...">
             Upload Guarantor Documents
           </Button>
 
-          {isLoading && (
-            <VStack spacing={4}>
-            <Spinner size="xl" color="teal.500" thickness="4px" />
-            <Text fontSize="lg" fontWeight="medium">Processing your registration...</Text>
-          </VStack>
+          {/* {loading && <Spinner />} */}
+          {loading && (
+           <VStack spacing={4}>
+           <Spinner size="xl" color="teal.500" thickness="4px" />
+           <Text fontSize="lg" fontWeight="medium">Processing Please wait...</Text>
+         </VStack>
           )}
         </VStack>
       </Container>

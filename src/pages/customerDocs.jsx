@@ -175,7 +175,7 @@ const CustomerUpload = () => {
           {loading && (
            <VStack spacing={4}>
            <Spinner size="xl" color="teal.500" thickness="4px" />
-           <Text fontSize="lg" fontWeight="medium">Processing your registration...</Text>
+           <Text fontSize="lg" fontWeight="medium">Processing Please wait...</Text>
          </VStack>
           )}
         </VStack>

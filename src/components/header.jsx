@@ -16,7 +16,7 @@ import {
 } from '@chakra-ui/react';
 import { FiMenu, FiMoon, FiSun, FiUser, FiMail, FiLogOut } from 'react-icons/fi';
 import useDataStore from '../zustand/userDataStore';
-import { userSignOut } from '../service/auth';
+import { userSignOut } from '../service/authenticate';
 import { database } from "../config/firebase";
 import { ref, onValue } from "firebase/database";
 

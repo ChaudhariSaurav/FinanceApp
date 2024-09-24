@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   Box,
   VStack,
@@ -8,57 +8,21 @@ import {
   Icon,
   Text,
   Flex,
-  Avatar,
-  Menu,
-  MenuButton,
-  MenuList,
-  MenuItem,
   Divider,
   useColorModeValue,
-  useDisclosure,
 } from '@chakra-ui/react';
 import { 
   FiSearch, 
-  FiGrid, 
-  FiPieChart, 
-  FiFile, 
-  FiClock, 
-  FiStar, 
-  FiHelpCircle, 
-  FiSettings, 
   FiChevronDown, 
   FiChevronRight,
-  FiUser,
-  FiLogOut,
-  FiCreditCard
 } from 'react-icons/fi';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { bottomRoutes, dashboardRoutes } from '../stores/dashboardRoutes';
 
-const dashboardRoutes = [
-  { icon: FiGrid, name: "Dashboard", path: "/dashboard" },
-  // { icon: FiPieChart, name: "Analysis", path: "/analysis" },
-  { 
-    icon: FiFile, 
-    name: "Documents", 
-    path: "/documents", 
-    hasSubmenu: true,
-    submenuItems: [
-      { name: "Customer Document", path: "/documents/customer" },
-      { name: "Guranter Document", path: "/documents/guranter" },
-      { name: "Total Document", path: "/documents/final" },
-    ]
-  },
-  { icon: FiCreditCard, name: "Emis", path: "/emis" },
-  // { icon: FiClock, name: "History", path: "/history" },
-  // { icon: FiStar, name: "Favorites", path: "/favorites" },
-];
 
-const bottomRoutes = [
-  { icon: FiHelpCircle, name: "Help Center", path: "/help" },
-];
 
 const Sidebar = ({ isOpen }) => {
-  const { isOpen: isSubmenuOpen, onToggle: onSubmenuToggle } = useDisclosure();
+  const [openSubmenu, setOpenSubmenu] = useState(null);
   const location = useLocation();
   const navigate = useNavigate(); 
   const bgColor = useColorModeValue('gray.50', 'gray.900');
@@ -69,30 +33,32 @@ const Sidebar = ({ isOpen }) => {
 
   const isActive = (path) => location.pathname === path || location.pathname.startsWith(path);
 
-  const renderMenuItem = useCallback(({ icon, name, path, hasSubmenu = false }) => (
-    <Flex
-      key={path}
-      align="center"
-      p={2}
-      cursor="pointer"
-      borderRadius="md"
-      transition="all 0.2s"
-      bg={isActive(path) ? activeBgColor : 'transparent'}
-      color={isActive(path) ? activeTextColor : textColor}
-      _hover={{ bg: isActive(path) ? activeBgColor : hoverBgColor }}
-      onClick={() => {
-        if (hasSubmenu) {
-          onSubmenuToggle();
-        } else {
-          navigate(path); 
-        }
-      }}
-    >
-      <Icon as={icon} mr={3} />
-      <Text flex={1} fontWeight={isActive(path) ? 'bold' : 'normal'}>{name}</Text>
-      {hasSubmenu && <Icon as={isSubmenuOpen ? FiChevronDown : FiChevronRight} />}
-    </Flex>
-  ), [isSubmenuOpen, activeBgColor, activeTextColor, textColor, hoverBgColor, location.pathname, navigate]);
+  const renderMenuItem = useCallback(({ icon, name, path, hasSubmenu }) => {
+    return (
+      <Flex
+        key={path}
+        align="center"
+        p={2}
+        cursor="pointer"
+        borderRadius="md"
+        transition="all 0.2s"
+        bg={isActive(path) ? activeBgColor : 'transparent'}
+        color={isActive(path) ? activeTextColor : textColor}
+        _hover={{ bg: isActive(path) ? activeBgColor : hoverBgColor }}
+        onClick={() => {
+          if (hasSubmenu) {
+            setOpenSubmenu(openSubmenu === path ? null : path);
+          } else {
+            navigate(path); 
+          }
+        }}
+      >
+        <Icon as={icon} mr={3} />
+        <Text flex={1} fontWeight={isActive(path) ? 'bold' : 'normal'}>{name}</Text>
+        {hasSubmenu && <Icon as={openSubmenu === path ? FiChevronDown : FiChevronRight} />}
+      </Flex>
+    );
+  }, [openSubmenu, activeBgColor, activeTextColor, textColor, hoverBgColor, location.pathname, navigate]);
 
   const renderSubmenuItems = useCallback((items) => (
     <VStack align="stretch" pl={6} mt={1}>
@@ -150,7 +116,7 @@ const Sidebar = ({ isOpen }) => {
                 path: route.path,
                 hasSubmenu: route.hasSubmenu,
               })}
-              {route.hasSubmenu && isSubmenuOpen && renderSubmenuItems(route.submenuItems)}
+              {route.hasSubmenu && openSubmenu === route.path && renderSubmenuItems(route.submenuItems)}
             </React.Fragment>
           ))}
         </VStack>

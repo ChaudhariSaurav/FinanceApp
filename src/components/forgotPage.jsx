@@ -15,10 +15,9 @@ import {
   InputLeftElement,
   useColorModeValue,
 } from "@chakra-ui/react";
-import { sendPasswordResetEmail } from "firebase/auth";
-import { auth } from "../config/firebase"; // Adjust the path to your firebase config
 import { LuAlertCircle, LuArrowLeft, LuMail } from "react-icons/lu";
 import { useNavigate } from "react-router-dom";
+import { handleForgotPassword } from "../service/authenticate";
 
 const ForgotPasswordPage = () => {
   const [email, setEmail] = useState("");
@@ -48,8 +47,8 @@ const ForgotPasswordPage = () => {
     }
 
     try {
-      await sendPasswordResetEmail(auth, email);
-      setEmailMessage(`We're sending the reset link to this email: ${email}`);
+      const message = await handleForgotPassword(email);
+      setEmailMessage(message);
       toast({
         title: "Password Reset Email Sent",
         description: "Check your inbox for the password reset link.",
@@ -63,34 +62,14 @@ const ForgotPasswordPage = () => {
     } catch (error) {
       console.error("Error sending password reset email:", error);
       setEmailMessage("");
-      if (error.code === "auth/invalid-email") {
-        toast({
-          title: "Invalid Email Address",
-          description: "Please enter a valid email address.",
-          status: "error",
-          duration: 5000,
-          isClosable: true,
-          icon: <LuAlertCircle />,
-        });
-      } else if (error.code === "auth/user-not-found") {
-        toast({
-          title: "Email Not Found",
-          description: "There is no account associated with this email address.",
-          status: "error",
-          duration: 5000,
-          isClosable: true,
-          icon: <LuAlertCircle />,
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: "There was an error sending the password reset email. Please try again.",
-          status: "error",
-          duration: 5000,
-          isClosable: true,
-          icon: <LuAlertCircle />,
-        });
-      }
+      toast({
+        title: "Error",
+        description: error.message,
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+        icon: <LuAlertCircle />,
+      });
     } finally {
       setIsLoading(false);
     }

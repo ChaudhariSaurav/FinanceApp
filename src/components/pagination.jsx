@@ -1,5 +1,6 @@
 import React from 'react';
 import { HStack, Button, Text } from '@chakra-ui/react';
+import { LuChevronLeft, LuChevronRight } from 'react-icons/lu';
 
 const Pagination = ({ currentPage, totalPages, onPageChange }) => {
   const handlePrevious = () => {
@@ -12,11 +13,11 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
 
   return (
     <HStack spacing={4} mt={4}>
-      <Button onClick={handlePrevious} disabled={currentPage === 1}>
+      <Button onClick={handlePrevious} disabled={currentPage === 1} leftIcon={<LuChevronLeft />}>
         Previous
       </Button>
       <Text>Page {currentPage} of {totalPages}</Text>
-      <Button onClick={handleNext} disabled={currentPage === totalPages}>
+      <Button onClick={handleNext} disabled={currentPage === totalPages} rightIcon={<LuChevronRight />}>
         Next
       </Button>
     </HStack>
