@@ -41,43 +41,10 @@ const InstallmentPage = () => {
   const [loading, setLoading] = useState(true);
   const itemsPerPage = 5;
 
-  useEffect(() => {
-    const fetchInstallments = async () => {
-      if (!user) return;
-      setLoading(true);
-
-      const installmentRef = ref(database, `installments/${user.uid}`);
-      const snapshot = await get(installmentRef);
-
-      if (snapshot.exists()) {
-        const data = snapshot.val();
-        const installmentArray = Object.keys(data).map(key => ({
-          ...data[key],
-          month: parseInt(key, 10),
-        }));
-        setInstallments(installmentArray);
-      } else {
-        setInstallments([]);
-      }
-
-      setLoading(false);
-    };
-
-    fetchInstallments();
-  }, [user]);
-
-  const filteredData = installments.filter((installment) => {
-    const matchesStatus =
-      statusFilter === "All" || installment.status === statusFilter;
-    const matchesSearch = monthNames[installment.month].toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesStatus && matchesSearch;
-  });
-
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-  const paginatedData = filteredData.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  const formatMonthFromDate = (dateString) => {
+    const date = new Date(dateString);
+    return monthNames[date.getMonth()]; // Get the month name from the date
+  };
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -97,6 +64,47 @@ const InstallmentPage = () => {
         return null;
     }
   };
+
+  useEffect(() => {
+    const fetchInstallments = async () => {
+      if (!user) return;
+      setLoading(true);
+
+      const installmentRef = ref(database, `installments/${user.uid}`);
+      const snapshot = await get(installmentRef);
+
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        console.log("data", data)
+        const installmentArray = Object.keys(data).map(key => ({
+          ...data[key],
+          month: parseInt(key, 10),
+        }));
+        setInstallments(installmentArray);
+        console.log("instament", installments)
+      } else {
+        setInstallments([]);
+      }
+
+      setLoading(false);
+    };
+
+    fetchInstallments();
+  }, [user]);
+
+  const filteredData = installments.filter((installment) => {
+    const matchesStatus =
+      statusFilter === "All" || installment.status === statusFilter;
+    const dueMonthName = formatMonthFromDate(installment.dueDate || installment.paymentDate);
+    const matchesSearch = dueMonthName.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesStatus && matchesSearch;
+  });
+
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  const paginatedData = filteredData.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   return (
     <AppLayout>
@@ -149,13 +157,11 @@ const InstallmentPage = () => {
                 </Thead>
                 <Tbody>
                   {paginatedData.map((installment) => {
-                    const monthName = (installment.month >= 0 && installment.month <= 11)
-                      ? monthNames[installment.month] // Directly use installment.month
-                      : "Invalid Month"; // Safeguard for invalid months
+                    const dueMonthName = formatMonthFromDate(installment.dueDate || installment.paymentDate);
 
                     return (
                       <Tr key={installment.month}>
-                        <Td>{`${monthName}`}</Td>
+                        <Td>{dueMonthName}</Td>
                         <Td>
                           {installment.status === "Paid" 
                             ? installment.amountPaid 

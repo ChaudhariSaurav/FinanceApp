@@ -13,11 +13,15 @@ import {
   Select,
   SimpleGrid,
   Spinner,
+  Progress,
+  Flex,
+  IconButton,
 } from "@chakra-ui/react";
 import { useDropzone } from "react-dropzone";
 import { handleUploadFiles } from "../service/auth";
 import useDataStore from "../zustand/userDataStore";
 import AppLayout from "../layout/AppShell";
+import { MdDelete } from "react-icons/md"; // Import trash icon
 
 const GuarantorUpload = () => {
   const [guarantorDetails, setGuarantorDetails] = useState({
@@ -27,7 +31,8 @@ const GuarantorUpload = () => {
     relationship: "",
   });
   const [files, setFiles] = useState([]);
-  const [loading, setLoading] = useState(false); // Loading state
+  const [loading, setLoading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState({});
   const toast = useToast();
   const { user } = useDataStore();
 
@@ -36,7 +41,7 @@ const GuarantorUpload = () => {
   };
 
   const onDrop = useCallback((acceptedFiles) => {
-    setFiles((prevFiles) => [...prevFiles, ...acceptedFiles]); // Append files
+    setFiles((prevFiles) => [...prevFiles, ...acceptedFiles]);
   }, []);
 
   const { getRootProps, getInputProps } = useDropzone({
@@ -82,6 +87,10 @@ const GuarantorUpload = () => {
     return true;
   };
 
+  const handleUploadProgress = (fileName, progress) => {
+    setUploadProgress((prev) => ({ ...prev, [fileName]: progress }));
+  };
+
   const handleSubmit = async () => {
     if (!validateInputs()) return;
     if (files.length === 0) {
@@ -95,10 +104,10 @@ const GuarantorUpload = () => {
       return;
     }
 
-    setLoading(true); // Start loading
+    setLoading(true);
 
     try {
-      await handleUploadFiles(files, user, 'guarantor', guarantorDetails);
+      await handleUploadFiles(files, user, 'guarantor', guarantorDetails, handleUploadProgress);
       toast({
         title: "Upload successful",
         description: "Guarantor documents and details have been successfully uploaded.",
@@ -108,25 +117,43 @@ const GuarantorUpload = () => {
       });
       setFiles([]);
       setGuarantorDetails({ adharNumber: "", panCardNumber: "", name: "", relationship: "" });
+      setUploadProgress({});
     } catch (error) {
       toast({
         title: "Upload failed",
-        description: error.message,
+        description: error.message || "An unknown error occurred.",
         status: "error",
         duration: 5000,
         isClosable: true,
       });
     } finally {
-      setLoading(false); // Stop loading
+      setLoading(false);
     }
   };
+
+  const removeFile = (fileName) => {
+    setFiles((prevFiles) => prevFiles.filter((file) => file.name !== fileName));
+  };
+
+  const isUploadButtonEnabled = () => {
+    return files.length > 0 && !loading;
+  };
+
+  const uploadButtonText = loading ? "Please wait..." : "Upload Guarantor Documents";
 
   return (
     <AppLayout>
       <Container maxW="container.md" py={8}>
         <VStack spacing={8} align="stretch">
-          <Heading size="lg">Guarantor Document Upload</Heading>
-          
+          <Flex align="center">
+            <Heading size="lg">Guarantor Document Upload</Heading>
+            {loading && (
+              <Text ml={4} fontSize="lg" fontWeight="medium">
+                Documents uploading, please wait...
+              </Text>
+            )}
+          </Flex>
+
           <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
             <FormControl isRequired>
               <FormLabel>Guarantor Name</FormLabel>
@@ -145,6 +172,7 @@ const GuarantorUpload = () => {
                 value={guarantorDetails.adharNumber}
                 onChange={handleGuarantorChange}
                 placeholder="123456789012"
+                maxLength={12}
               />
             </FormControl>
 
@@ -155,6 +183,7 @@ const GuarantorUpload = () => {
                 value={guarantorDetails.panCardNumber}
                 onChange={handleGuarantorChange}
                 placeholder="ABCDE1234F"
+                maxLength={10}
               />
             </FormControl>
 
@@ -194,21 +223,40 @@ const GuarantorUpload = () => {
             <VStack align="stretch">
               <Text fontWeight="bold">Selected Files:</Text>
               {files.map((file) => (
-                <Text key={file.name}>{file.name}</Text>
+                <Box key={file.name} display="flex" alignItems="center" justifyContent="space-between">
+                  <Text>{file.name}</Text>
+                  <Flex alignItems="center">
+                    {uploadProgress[file.name] !== undefined ? (
+                      <Progress value={uploadProgress[file.name]} colorScheme="teal" size="sm" width="200px" />
+                    ) : null}
+                    <IconButton
+                      aria-label="Remove file"
+                      icon={<MdDelete />}
+                      onClick={() => removeFile(file.name)}
+                      colorScheme="red"
+                      size="sm"
+                      ml={2}
+                    />
+                  </Flex>
+                </Box>
               ))}
             </VStack>
           )}
 
-          <Button colorScheme="blue" onClick={handleSubmit} isLoading={loading} loadingText="Uploading...">
-            Upload Guarantor Documents
+          <Button
+            colorScheme="blue"
+            onClick={handleSubmit}
+            isLoading={loading}
+            disabled={!isUploadButtonEnabled()}
+          >
+            {uploadButtonText}
           </Button>
 
-          {/* {loading && <Spinner />} */}
           {loading && (
-           <VStack spacing={4}>
-           <Spinner size="xl" color="teal.500" thickness="4px" />
-           <Text fontSize="lg" fontWeight="medium">Processing Please wait...</Text>
-         </VStack>
+            <VStack spacing={4}>
+              <Spinner size="xl" color="teal.500" thickness="4px" />
+              <Text fontSize="lg" fontWeight="medium">Processing, please wait...</Text>
+            </VStack>
           )}
         </VStack>
       </Container>

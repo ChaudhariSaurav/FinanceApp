@@ -13,19 +13,25 @@ import {
   Spinner,
   Progress,
   useToast,
+  Flex,
+  Box,
+  IconButton,
+  useColorMode,
 } from "@chakra-ui/react";
+import { LuXCircle, LuCheck } from "react-icons/lu";
 
 const DashContent = () => {
   const [userData, setUserData] = useState([]);
   const [paymentHistory, setPaymentHistory] = useState([]);
-  const [installments, setInstallments] = useState([]); // Added state for installments
+  const [installments, setInstallments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [bannerVisible, setBannerVisible] = useState(true);
   const toast = useToast();
   const { user } = useDataStore();
   const [greeting, setGreeting] = useState("");
+  const { colorMode } = useColorMode();
 
   useEffect(() => {
-    // Set greeting based on the time of day
     const currentHour = new Date().getHours();
     if (currentHour < 12) {
       setGreeting("Good Morning!");
@@ -38,13 +44,32 @@ const DashContent = () => {
     }
   }, []);
 
+  // Clock component
+  const Clock = () => {
+    const [time, setTime] = useState(new Date());
+
+    useEffect(() => {
+      const intervalId = setInterval(() => {
+        setTime(new Date());
+      }, 1000);
+
+      return () => clearInterval(intervalId);
+    }, []);
+
+    return (
+      <Text fontSize={"xl"} style={{ textDecoration: "uppercase" }}>
+        {time.toLocaleTimeString()}
+      </Text>
+    );
+  };
+
+  // Fetch user data
   useEffect(() => {
     const userId = user.uid;
     const userRef = ref(database, `users/${userId}`);
     const paymentHistoryRef = ref(database, `users/${userId}/paymentHistory`);
     const installmentsRef = ref(database, `installments/${userId}`);
 
-    // Fetch user data
     const unsubscribeUser = onValue(userRef, (snapshot) => {
       const data = snapshot.val();
       if (data) {
@@ -58,7 +83,6 @@ const DashContent = () => {
       }
     });
 
-    // Fetch payment history
     const unsubscribePaymentHistory = onValue(paymentHistoryRef, (snapshot) => {
       const historyInfo = snapshot.val();
       if (historyInfo) {
@@ -66,13 +90,12 @@ const DashContent = () => {
       }
     });
 
-    // Fetch installments data
     const unsubscribeInstallments = onValue(installmentsRef, (snapshot) => {
       const installmentsInfo = snapshot.val();
       if (installmentsInfo) {
         setInstallments(Object.values(installmentsInfo));
       }
-      setLoading(false); // Set loading false here to indicate data fetching is done
+      setLoading(false);
     });
 
     return () => {
@@ -82,6 +105,7 @@ const DashContent = () => {
     };
   }, [user.uid, toast]);
 
+  // Calculate functions for payments and installments
   const calculateTotalPaid = () => {
     return paymentHistory.reduce(
       (acc, item) => acc + (item?.amountPaid || 0),
@@ -110,48 +134,123 @@ const DashContent = () => {
 
   const nextInstallmentDate = getNextInstallmentDate();
 
+  const handleCloseBanner = () => {
+    setBannerVisible(false);
+  };
+
   return (
     <AppLayout>
+      {bannerVisible && (
+        <Box
+          p={2}
+          mb={2}
+          bg={colorMode === "dark" ? "gray.900" : "blue.800"}
+          color="white"
+          borderRadius="md"
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+        >
+          <Text textAlign="center" flexGrow={1}>
+            Welcome to the Ad Finance Customer Portal!
+          </Text>
+          <IconButton
+            background={'transparent'}
+            onClick={handleCloseBanner}
+            aria-label="Close banner"
+            icon={<LuXCircle />}
+          />
+        </Box>
+      )}
+
       <Container maxW="container.xl" py={8}>
-        <Text fontSize="xl" mb={4}>
-          {userData.map((user, index) => (
-            <Text key={index} fontSize="lg" fontWeight="bold">
-              {greeting} 🙌 {user.firstName} {user.lastName}
-            </Text>
-          ))}
-        </Text>
+        <Flex justify="space-between" align="center" mb={4}>
+          <Text fontSize="lg" fontWeight="bold">
+            {userData.length > 0 ? (
+              <Text>
+                {greeting} 🙌 {userData[0].firstName} {userData[0].lastName}
+              </Text>
+            ) : (
+              <Text>No user data available.</Text>
+            )}
+          </Text>
+          <Text id="clock" fontSize="lg" fontWeight="bold">
+            <Clock />
+          </Text>
+        </Flex>
 
         {loading ? (
-          <VStack spacing={4}>
+          <VStack spacing={2}>
             <Spinner size="xl" />
             <Text>Loading...</Text>
           </VStack>
         ) : (
           <SimpleGrid columns={{ base: 1, md: 2 }} spacing={12}>
-            <SimpleGrid columns={{ base: 1, md: 1 }} spacing={12}>
-              {userData.map((user, index) => (
-                <Card
-                  key={index}
-                  borderWidth={1}
-                  borderRadius="md"
-                  boxShadow="md"
-                >
-                  <CardBody>
-                    <Text>Customer Id: {user.customerId}</Text>
-                    <Text>Loan for Apply: {user.loanValue}</Text>
-                    <Text>Emis for: {user.totalEmiMonths} Months</Text>
-                    <Text>Mobile: {user.mobile}</Text>
-                    <Text>Date of Birth: {user.dateOfBirth}</Text>
-                    <Text>
-                      Aadhar Number: {user?.documents?.customer?.adharNumber}
-                    </Text>
-                    <Text>
-                      Pancard Number: {user?.documents?.customer?.panCardNumber}
-                    </Text>
-                  </CardBody>
-                </Card>
-              ))}
-            </SimpleGrid>
+            <Card borderWidth={1} borderRadius="md" boxShadow="md">
+              <CardBody>
+                {userData.map((user, index) => (
+                  <VStack align="start" spacing={2} key={index}>
+                    <Text fontWeight="bold">Customer Details</Text>
+                    <Flex justify="space-between" width="full">
+                      <Text>Customer Id:</Text>
+                      <Text>{user.customerId}</Text>
+                    </Flex>
+                    <Flex justify="space-between" width="full">
+                      <Text>Loan Amount:</Text>
+                      <Text>{user.loanValue}</Text>
+                    </Flex>
+                    <Flex justify="space-between" width="full">
+                      <Text>EMIs for:</Text>
+                      <Text>{user.totalEmiMonths} Months</Text>
+                    </Flex>
+                    <Flex justify="space-between" width="full">
+                      <Text>Mobile:</Text>
+                      <Text>{user.mobile}</Text>
+                    </Flex>
+                    <Flex justify="space-between" width="full">
+                      <Text>Date of Birth:</Text>
+                      <Text>{user.dateOfBirth}</Text>
+                    </Flex>
+                    <Flex justify="space-between" width="full">
+                      <Text>Customer Document:</Text>
+                      <Text>
+                        {user.customerDocumentUploaded ? (
+                          <Text>
+                            <LuCheck color="green" /> Uploaded
+                          </Text>
+                        ) : (
+                          <Text>
+                            <LuXCircle color="red" /> Not Uploaded
+                          </Text>
+                        )}
+                      </Text>
+                    </Flex>
+                    <Flex justify="space-between" width="full">
+                      <Text>Guarantor Document:</Text>
+                      <Text>
+                        {user.guarantorDocumentUploaded ? (
+                          <Text>
+                            <LuCheck color="green" /> Uploaded
+                          </Text>
+                        ) : (
+                          <Text>
+                            <LuXCircle color="red" /> Not Uploaded
+                          </Text>
+                        )}
+                      </Text>
+                    </Flex>
+                    <Flex justify="space-between" width="full">
+                      <Text>Aadhar Number:</Text>
+                      <Text>{user?.documents?.customer?.adharNumber}</Text>
+                    </Flex>
+                    <Flex justify="space-between" width="full">
+                      <Text>Pancard Number:</Text>
+                      <Text>{user?.documents?.customer?.panCardNumber}</Text>
+                    </Flex>
+                  </VStack>
+                ))}
+              </CardBody>
+            </Card>
             <Card borderWidth={1} borderRadius="md" boxShadow="md">
               <CardBody>
                 <Text fontSize="lg" fontWeight="bold" mb={4}>
@@ -175,7 +274,8 @@ const DashContent = () => {
                     </Text>
                     {nextInstallmentDate && (
                       <Text mt={2} fontSize="md" fontWeight="bold" color="teal">
-                        Next Installment Due Date: {new Date(nextInstallmentDate).toLocaleDateString()}
+                        Next Installment Due Date:{" "}
+                        {new Date(nextInstallmentDate).toLocaleDateString()}
                       </Text>
                     )}
                   </>

@@ -1,4 +1,5 @@
 import { FiCreditCard, FiDollarSign, FiFile, FiGrid, FiHelpCircle } from "react-icons/fi";
+import { LuIndianRupee } from "react-icons/lu";
 
 export const dashboardRoutes = [
 	{ icon: FiGrid, name: "Dashboard", path: "/dashboard" },
@@ -10,7 +11,7 @@ export const dashboardRoutes = [
 	  submenuItems: [
 		{ name: "Customer Document", path: "/documents/customer" },
 		{ name: "Guranter Document", path: "/documents/guranter" },
-		{ name: "Total Document", path: "/documents/final" },
+		{ name: "Upload Document", path: "/documents/final" },
 	  ]
 	},
 	{ 
@@ -23,7 +24,7 @@ export const dashboardRoutes = [
 		{ name: "EMI Details", path: "/emi/details" },
 	  ]
 	},
-	{ icon: FiDollarSign, name: "Payment History", path: "/payment-history" },
+	{ icon: LuIndianRupee , name: "Payment History", path: "/payment-history" },
   ];
   
   export const bottomRoutes = [

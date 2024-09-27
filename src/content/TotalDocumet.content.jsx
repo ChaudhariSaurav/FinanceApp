@@ -7,7 +7,6 @@ import {
   VStack,
   SimpleGrid,
   Image,
-  Link,
   Spinner,
   useToast,
   Badge,
@@ -16,12 +15,13 @@ import {
   IconButton,
   Tooltip,
   AbsoluteCenter,
+  useColorMode,
 } from "@chakra-ui/react";
-import { ref, get } from "firebase/database";
+import { ref, get, set } from "firebase/database";
 import { database } from "../config/firebase";
 import useDataStore from "../zustand/userDataStore";
 import AppLayout from "../layout/AppShell";
-import { LuFileText, LuDownload, LuImage } from "react-icons/lu";
+import { LuFileText, LuDownload, LuImage, LuTrash } from "react-icons/lu";
 import { images } from "../stores/images";
 
 const FinalUploadedPage = () => {
@@ -30,18 +30,13 @@ const FinalUploadedPage = () => {
   const [loading, setLoading] = useState(true);
   const { user } = useDataStore();
   const toast = useToast();
+  const { colorMode } = useColorMode();
 
   useEffect(() => {
     const fetchDocuments = async () => {
       try {
-        const customerRef = ref(
-          database,
-          `users/${user.uid}/documents/customer`
-        );
-        const guarantorRef = ref(
-          database,
-          `users/${user.uid}/documents/guarantor`
-        );
+        const customerRef = ref(database, `users/${user.uid}/documents/customer`);
+        const guarantorRef = ref(database, `users/${user.uid}/documents/guarantor`);
 
         const [customerSnapshot, guarantorSnapshot] = await Promise.all([
           get(customerRef),
@@ -96,7 +91,40 @@ const FinalUploadedPage = () => {
       });
   };
 
-  const renderDocuments = (docs, title) => {
+  const handleRemoveDocument = async (type, index) => {
+    const documentRef = ref(database, `users/${user.uid}/documents/${type}`);
+    const fileUrls = type === "customer" ? customerDocs.fileUrls : guarantorDocs.fileUrls;
+
+    try {
+      const updatedFileUrls = fileUrls.filter((_, i) => i !== index);
+      await set(documentRef, { fileUrls: updatedFileUrls });
+
+      if (type === "customer") {
+        setCustomerDocs((prev) => ({ ...prev, fileUrls: updatedFileUrls }));
+      } else {
+        setGuarantorDocs((prev) => ({ ...prev, fileUrls: updatedFileUrls }));
+      }
+
+      toast({
+        title: "Document Removed",
+        description: "The document has been removed successfully.",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (error) {
+      console.error("Error removing document:", error);
+      toast({
+        title: "Remove Error",
+        description: "Failed to remove the document. Please try again.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
+
+  const renderDocuments = (docs, title, type) => {
     if (!docs) return null;
 
     return (
@@ -112,54 +140,57 @@ const FinalUploadedPage = () => {
               borderRadius="lg"
               overflow="hidden"
               boxShadow="md"
+              bg={colorMode === "dark" ? "gray.700" : "gray.50"}
+              _hover={{ boxShadow: "xl", transition: "0.2s" }}
             >
-              <Box p={4} bg="gray.50">
+              <Box p={4}>
                 <HStack justifyContent="space-between">
-                  <Badge
-                    colorScheme={
-                      url.toLowerCase().endsWith(".pdf") ? "red" : "green"
-                    }
-                  >
+                  <Badge colorScheme={url.toLowerCase().endsWith(".pdf") ? "red" : "green"}>
                     {url.toLowerCase().endsWith(".pdf") ? "PDF" : "Image"}
                   </Badge>
-                  <Tooltip
-                    label={
-                      url.toLowerCase().endsWith(".pdf")
-                        ? "Download PDF"
-                        : "View Image"
-                    }
-                  >
-                    <IconButton
-                      icon={
-                        url.toLowerCase().endsWith(".pdf") ? (
-                          <LuDownload />
-                        ) : (
-                          <LuImage />
-                        )
-                      }
-                      onClick={() =>
-                        url.toLowerCase().endsWith(".pdf")
-                          ? handleDownload(url, `document_${index + 1}.pdf`)
-                          : window.open(url, "_blank")
-                      }
-                      aria-label={
+                  <HStack>
+                    <Tooltip
+                      label={
                         url.toLowerCase().endsWith(".pdf")
                           ? "Download PDF"
                           : "View Image"
                       }
-                      size="sm"
-                    />
-                  </Tooltip>
+                    >
+                      <IconButton
+                        icon={
+                          url.toLowerCase().endsWith(".pdf") ? (
+                            <LuDownload />
+                          ) : (
+                            <LuImage />
+                          )
+                        }
+                        onClick={() =>
+                          url.toLowerCase().endsWith(".pdf")
+                            ? handleDownload(url, `document_${index + 1}.pdf`)
+                            : window.open(url, "_blank")
+                        }
+                        aria-label={
+                          url.toLowerCase().endsWith(".pdf")
+                            ? "Download PDF"
+                            : "View Image"
+                        }
+                        size="sm"
+                      />
+                    </Tooltip>
+                    <Tooltip label="Remove Document">
+                      <IconButton
+                        icon={<LuTrash />}
+                        onClick={() => handleRemoveDocument(type, index)}
+                        aria-label="Remove Document"
+                        colorScheme="red"
+                        size="sm"
+                      />
+                    </Tooltip>
+                  </HStack>
                 </HStack>
               </Box>
               {url.toLowerCase().endsWith(".pdf") ? (
-                <Box
-                  p={4}
-                  bg="gray.100"
-                  textAlign="center"
-                  m={5}
-                  boxShadow={"xl"}
-                >
+                <Box p={4} textAlign="center" bg={colorMode === "dark" ? "gray.800" : "gray.100"}>
                   <LuFileText size={48} />
                   <Text mt={2}>Document {index + 1}</Text>
                 </Box>
@@ -167,9 +198,10 @@ const FinalUploadedPage = () => {
                 <Image
                   src={url}
                   alt={`Uploaded document ${index + 1}`}
-                  objectFit="cover"
-                  height="200px"
+                  objectFit={{ base: "contain", md: "cover" }}
+                  height={{ base: "auto", md: "200px" }}
                   width="100%"
+                  maxHeight={{ base: "300px", md: "200px" }} // Responsive height
                 />
               )}
             </Box>
@@ -183,7 +215,7 @@ const FinalUploadedPage = () => {
     if (!details) return null;
 
     return (
-      <Box bg="gray.50" p={4} borderRadius="md" boxShadow="sm">
+      <Box p={4} borderRadius="md" boxShadow="sm" bg={colorMode === "dark" ? "gray.800" : "gray.200"}>
         <Heading size="md" mb={2}>
           {title}
         </Heading>
@@ -192,9 +224,7 @@ const FinalUploadedPage = () => {
             ([key, value]) =>
               key !== "fileUrls" && (
                 <HStack key={key} justifyContent="space-between">
-                  <Text fontWeight="bold">
-                    {key.charAt(0).toUpperCase() + key.slice(1)}:
-                  </Text>
+                  <Text fontWeight="bold">{key.charAt(0).toUpperCase() + key.slice(1)}:</Text>
                   <Text>{value}</Text>
                 </HStack>
               )
@@ -207,9 +237,10 @@ const FinalUploadedPage = () => {
   if (loading) {
     return (
       <AppLayout>
-        <Container centerContent>
-          <Spinner size="xl" />
-        </Container>
+        <VStack spacing={2}>
+            <Spinner size="xl" />
+            <Text>Please wait....</Text>
+          </VStack>
       </AppLayout>
     );
   }
@@ -229,32 +260,32 @@ const FinalUploadedPage = () => {
 
           <Box position="relative" padding="10">
             <Divider />
-            <AbsoluteCenter bg="white" px="4">
-              <Badge>Customer Document </Badge>
+            <AbsoluteCenter bg={colorMode === "dark" ? "gray.800" : "white"} px="4">
+              <Badge>Customer Document</Badge>
             </AbsoluteCenter>
           </Box>
 
-          {renderDocuments(customerDocs, "Customer Documents")}
+          {renderDocuments(customerDocs, "Customer Documents", "customer")}
 
           <Box position="relative" padding="10">
             <Divider />
-            <AbsoluteCenter bg="white" px="4">
-              <Badge>Guranter Document </Badge>
+            <AbsoluteCenter bg={colorMode === "dark" ? "gray.800" : "white"} px="4">
+              <Badge>Guarantor Document</Badge>
             </AbsoluteCenter>
           </Box>
 
-          {renderDocuments(guarantorDocs, "Guarantor Documents")}
+          {renderDocuments(guarantorDocs, "Guarantor Documents", "guarantor")}
 
           {!customerDocs && !guarantorDocs && (
             <Box
               textAlign="center"
               p={8}
-              bg="transparent"
+              bg={colorMode === "dark" ? "gray.700" : "gray.200"}
               borderRadius="md"
               transition="all 0.3s"
               _hover={{
                 shadow: "md",
-                borderColor: "white",
+                borderColor: "gray.900",
               }}
             >
               {images.map((url, index) => (
@@ -268,8 +299,9 @@ const FinalUploadedPage = () => {
                   objectFit={"contain"}
                 />
               ))}
-
-              <Text fontSize="xl">No documents have been uploaded yet.</Text>
+              <Text fontSize="xl" color={colorMode === "dark" ? "white" : "gray.800"}>
+                No documents have been uploaded yet.
+              </Text>
             </Box>
           )}
         </VStack>

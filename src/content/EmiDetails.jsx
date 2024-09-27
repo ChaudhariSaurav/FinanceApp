@@ -1,6 +1,7 @@
+// EmiDetails.js
 import React, { useState, useEffect } from "react";
-import { useParams, Link as RouterLink, useNavigate } from "react-router-dom";
-import { ref, get } from "firebase/database";
+import { useParams, Link as RouterLink } from "react-router-dom";
+import { ref, get, set } from "firebase/database";
 import { database } from "../config/firebase";
 import useDataStore from "../zustand/userDataStore";
 import AppLayout from "../layout/AppShell";
@@ -27,6 +28,7 @@ import {
   StatNumber,
   StatHelpText,
   useToast,
+  Container,
 } from "@chakra-ui/react";
 import { LuChevronLeft, LuCreditCard } from "react-icons/lu";
 import { handlePayment } from "../service/auth";
@@ -39,7 +41,6 @@ const EmiDetails = () => {
   const [paymentProcessing, setPaymentProcessing] = useState(false);
   const user = useDataStore((state) => state.user);
   const toast = useToast();
-  const navigate = useNavigate();
 
   const bgColor = useColorModeValue("white", "gray.800");
   const borderColor = useColorModeValue("gray.200", "gray.600");
@@ -50,6 +51,13 @@ const EmiDetails = () => {
       if (!user) {
         setError("User not authenticated");
         setLoading(false);
+        toast({
+          title: "Authentication Error",
+          description: "You must be logged in to view EMI details.",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
         return;
       }
 
@@ -61,54 +69,57 @@ const EmiDetails = () => {
           setEmi({ ...snapshot.val(), month: parseInt(month, 10) });
         } else {
           setError("EMI details not found");
+          toast({
+            title: "Data Error",
+            description: "EMI details not found.",
+            status: "error",
+            duration: 5000,
+            isClosable: true,
+          });
         }
       } catch (err) {
         setError("Failed to fetch EMI details");
         console.error(err);
+        toast({
+          title: "Fetch Error",
+          description: "There was an issue fetching EMI details.",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
       } finally {
         setLoading(false);
       }
     };
 
     fetchEmiDetails();
-  }, [user, month]);
+  }, [user, month, toast]);
 
   const handleMakePayment = async () => {
     if (!user || !emi) return;
-
     setPaymentProcessing(true);
     try {
-      const result = await handlePayment(user.uid, emi.month, emi.amount );
-
+      const result = await handlePayment(user.uid, emi.month, emi.amount, toast);
+  
       if (result.success) {
         const updatedData = {
           ...emi,
           status: "Paid",
           paymentDate: new Date().toISOString(),
-        };
-
-        await ref(database, `installments/${user.uid}/${month}`).set(updatedData);
-        await ref(database, `users/${user.uid}/paymentStatus`).set({
+        };   
+      
+        await set(ref(database, `installments/${user.uid}/${month}`), updatedData);
+        await set(ref(database, `users/${user.uid}/paymentStatus`), {
           lastPayment: updatedData.paymentDate,
           status: "Paid",
         });
-
+  
         setEmi(updatedData);
-
-        toast({
-          title: "Payment Successful",
-          description: `₹${emi.amount.toFixed(2)} paid successfully for month ${emi.month}.`,
-          status: "success",
-          duration: 5000,
-          isClosable: true,
-        });
-
-        setTimeout(() => {
-          navigate("/emi/pay");
-        }, 1000);
-      } else {
-        throw new Error(result.message || "Payment failed. Please try again.");
       }
+      setTimeout(() => {
+        window.location.replace="/emi/pay";
+        }, 5000);
+  
     } catch (error) {
       console.error("Payment error:", error);
       toast({
@@ -166,7 +177,7 @@ const EmiDetails = () => {
 
   return (
     <AppLayout>
-      <Box p={4}>
+      <Container maxW="container.xl" p={4}>
         <Breadcrumb
           spacing="8px"
           separator={<LuChevronLeft color="gray.500" />}
@@ -223,6 +234,7 @@ const EmiDetails = () => {
                     colorScheme="green"
                     onClick={handlePrint}
                     size="lg"
+                    width="100%"
                   >
                     Print Receipt
                   </Button>
@@ -234,6 +246,7 @@ const EmiDetails = () => {
                     size="lg"
                     isLoading={paymentProcessing}
                     loadingText="Processing Payment"
+                    width="100%"
                   >
                     Make Payment
                   </Button>
@@ -263,10 +276,9 @@ const EmiDetails = () => {
             </SimpleGrid>
           ) : null}
         </Box>
-      </Box>
+      </Container>
     </AppLayout>
   );
-  
 };
 
 export default EmiDetails;

@@ -12,11 +12,14 @@ import {
   Text,
   SimpleGrid,
   Spinner,
+  Progress,
 } from "@chakra-ui/react";
 import { useDropzone } from "react-dropzone";
 import { handleUploadFiles } from "../service/auth";
 import useDataStore from "../zustand/userDataStore";
 import AppLayout from "../layout/AppShell";
+import { BsFiletypePdf } from "react-icons/bs";
+import { AiOutlineFileImage } from 'react-icons/ai';
 
 const CustomerUpload = () => {
   const [customerDetails, setCustomerDetails] = useState({
@@ -24,7 +27,8 @@ const CustomerUpload = () => {
     panCardNumber: "",
   });
   const [files, setFiles] = useState([]);
-  const [loading, setLoading] = useState(false); // Loading state
+  const [loading, setLoading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState({});
   const toast = useToast();
   const { user } = useDataStore();
 
@@ -33,7 +37,6 @@ const CustomerUpload = () => {
   };
 
   const onDrop = useCallback((acceptedFiles) => {
-    // Append new files to existing files
     setFiles((prevFiles) => [...prevFiles, ...acceptedFiles]);
   }, []);
 
@@ -80,6 +83,10 @@ const CustomerUpload = () => {
     return true;
   };
 
+  const handleUploadProgress = (fileName, progress) => {
+    setUploadProgress((prev) => ({ ...prev, [fileName]: progress }));
+  };
+
   const handleSubmit = async () => {
     if (!validateInputs()) return;
     if (files.length === 0) {
@@ -93,9 +100,9 @@ const CustomerUpload = () => {
       return;
     }
 
-    setLoading(true); // Set loading to true
+    setLoading(true);
     try {
-      await handleUploadFiles(files, user, 'customer', customerDetails);
+      await handleUploadFiles(files, user, 'customer', customerDetails, handleUploadProgress);
       toast({
         title: "Upload successful",
         description: "Your documents and details have been successfully uploaded.",
@@ -105,78 +112,101 @@ const CustomerUpload = () => {
       });
       setFiles([]);
       setCustomerDetails({ adharNumber: "", panCardNumber: "" });
+      setUploadProgress({});
     } catch (error) {
       toast({
         title: "Upload failed",
-        description: error.message,
+        description: error.message || "An unknown error occurred.",
         status: "error",
         duration: 5000,
         isClosable: true,
       });
     } finally {
-      setLoading(false); // Reset loading state
+      setLoading(false);
     }
   };
+
+  const isUploadButtonEnabled = () => {
+    return files.length > 0 && !loading;
+  };
+
+  const uploadButtonText = loading ? "Please wait..." : "Ready to upload";
 
   return (
     <AppLayout>
       <Container maxW="container.md" py={8}>
         <VStack spacing={8} align="stretch">
           <Heading size="lg">Customer Document Upload</Heading>
-
-          <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
-            <FormControl isRequired>
-              <FormLabel>Aadhar Number</FormLabel>
-              <Input
-                name="adharNumber"
-                value={customerDetails.adharNumber}
-                onChange={handleCustomerChange}
-                placeholder="123456789012"
-              />
-            </FormControl>
-
-            <FormControl isRequired>
-              <FormLabel>PAN Card Number</FormLabel>
-              <Input
-                name="panCardNumber"
-                value={customerDetails.panCardNumber}
-                onChange={handleCustomerChange}
-                placeholder="ABCDE1234F"
-              />
-            </FormControl>
-          </SimpleGrid>
-
-          <Box
-            {...getRootProps()}
-            border="2px dashed"
-            borderColor="gray.300"
-            borderRadius="md"
-            p={4}
-            textAlign="center"
-            cursor="pointer"
-          >
-            <input {...getInputProps()} />
-            <Text>Drag and drop files here, or click to select files</Text>
-          </Box>
-
-          {files.length > 0 && (
-            <VStack align="stretch">
-              <Text fontWeight="bold">Selected Files:</Text>
-              {files.map((file) => (
-                <Text key={file.name}>{file.name}</Text>
-              ))}
+          {loading && (
+            <VStack spacing={4}>
+              <Spinner size="xl" color="teal.500" thickness="4px" />
+              <Text fontSize="lg" fontWeight="medium">
+                Uploading documents, please wait...
+              </Text>
             </VStack>
           )}
-
-          <Button colorScheme="blue" onClick={handleSubmit} isLoading={loading}>
-            {loading ? "Loading..." : "Upload Documents"}
-          </Button>
-
-          {loading && (
-           <VStack spacing={4}>
-           <Spinner size="xl" color="teal.500" thickness="4px" />
-           <Text fontSize="lg" fontWeight="medium">Processing Please wait...</Text>
-         </VStack>
+          {!loading && (
+            <>
+              <SimpleGrid columns={{ base: 1, md: 2 }} spacing={6}>
+                <FormControl isRequired>
+                  <FormLabel>Aadhar Number</FormLabel>
+                  <Input
+                    name="adharNumber"
+                    value={customerDetails.adharNumber}
+                    onChange={handleCustomerChange}
+                    placeholder="123456789012"
+                    maxLength={12}
+                  />
+                </FormControl>
+                <FormControl isRequired>
+                  <FormLabel>PAN Card Number</FormLabel>
+                  <Input
+                    name="panCardNumber"
+                    value={customerDetails.panCardNumber}
+                    onChange={handleCustomerChange}
+                    placeholder="ABCDE1234F"
+                    maxLength={10}
+                  />
+                </FormControl>
+              </SimpleGrid>
+              <Box
+                {...getRootProps()}
+                border="2px dashed"
+                borderColor="gray.300"
+                borderRadius="md"
+                p={4}
+                textAlign="center"
+                cursor="pointer"
+              >
+                <input {...getInputProps()} />
+                <Text>Drag and drop files here, or click to select files</Text>
+              </Box>
+              {files.length > 0 && (
+                <VStack align="stretch">
+                  <Text fontWeight="bold">Selected Files:</Text>
+                  {files.map((file) => (
+                    <Box key={file.name} display="flex" alignItems="center" justifyContent="space-between">
+                      <Text>{file.name}</Text>
+                      <Text>
+                        {uploadProgress[file.name] !== undefined ? (
+                          <Progress value={uploadProgress[file.name]} colorScheme="teal" size="sm" width="200px" />
+                        ) : (
+                          file.type === 'application/pdf' ? <BsFiletypePdf/> : <AiOutlineFileImage />
+                        )}
+                      </Text>
+                    </Box>
+                  ))}
+                </VStack>
+              )}
+              <Button
+                colorScheme="blue"
+                onClick={handleSubmit}
+                isLoading={loading}
+                disabled={!isUploadButtonEnabled()}
+              >
+                {uploadButtonText}
+              </Button>
+            </>
           )}
         </VStack>
       </Container>

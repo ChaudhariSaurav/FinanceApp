@@ -9,6 +9,8 @@ import EmiPay from "../content/EmiPay";
 import EmiDetails from "../content/EmiDetails";
 import PaymentHistory from "../content/Paymenthistory.content";
 import HelpCenter from "../content/HelpCenter";
+import Profile from "../content/Profile";
+import ChangePass from "../content/ChangePass";
 
 
 
@@ -23,5 +25,7 @@ export const ValidAuthroutes = [
     { path: "/emi/details/:month", element: <EmiDetails/> },
     { path: "/payment-history", element: <PaymentHistory/> },
     { path: "/help-center", element: <HelpCenter/> },
+    { path: "/customer-profile", element: <Profile/> },
+    { path: "/change-password", element: <ChangePass/> },
     { path: "/*", element: <NotFoundError /> },
 ];

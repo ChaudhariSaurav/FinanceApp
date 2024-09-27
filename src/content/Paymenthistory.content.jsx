@@ -18,6 +18,8 @@ import {
   Button,
 } from "@chakra-ui/react";
 import Pagination from "../components/pagination";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
 
 function PaymentHistory() {
   const { user } = useDataStore();
@@ -90,14 +92,23 @@ function PaymentHistory() {
   const totalPages = Math.ceil(filteredPayments.length / itemsPerPage);
 
   const downloadTransactionHistory = () => {
-    const dataStr = JSON.stringify(filteredPayments, null, 2);
-    const blob = new Blob([dataStr], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "transaction_history.json"; // Name of the downloaded file
-    a.click();
-    URL.revokeObjectURL(url); // Clean up
+    const doc = new jsPDF();
+    doc.text("Transaction History", 14, 16);
+    
+    const tableData = filteredPayments.map(payment => [
+      payment.amountPaid,
+      formatDate(payment.paymentDate),
+      payment.razorpay_id,
+      payment.status
+    ]);
+
+    doc.autoTable({
+      head: [['Amount Paid', 'Payment Date', 'Payment ID', 'Status']],
+      body: tableData,
+      startY: 20,
+    });
+
+    doc.save("transaction_history.pdf");
   };
 
   if (loading) {

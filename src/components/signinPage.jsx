@@ -5,7 +5,6 @@ import {
   FormControl,
   FormLabel,
   Input,
-  Stack,
   useToast,
   Spinner,
   Center,
@@ -13,18 +12,15 @@ import {
   Heading,
   Link,
   Flex,
-  Divider,
-  HStack,
   VStack,
   InputGroup,
   InputLeftElement,
   useColorModeValue,
 } from '@chakra-ui/react';
-import { userLogin } from '../service/auth';
-import { useNavigate } from 'react-router-dom';
 import { FiLock, FiUser } from 'react-icons/fi';
 import { LuAlertCircle } from 'react-icons/lu';
-import { form } from 'framer-motion/client';
+import { userLoginByEmail, userLoginByCustomerID } from '../service/auth'; // Adjust import paths accordingly
+import { useNavigate } from 'react-router-dom'; // Assuming you're using React Router
 
 const SignInForm = () => {
   const toast = useToast();
@@ -71,25 +67,37 @@ const SignInForm = () => {
 
     try {
       const { identifier, password } = formData;
-      const response = await userLogin(identifier, password);
-      toast({
-        title: "Login Successful",
-        description: `Welcome back, ${response.name}!`,
-        status: "success",
-        duration: 5000,
-        isClosable: true,
-      });
+
+      if (identifier.includes('@')) {
+        const user = await userLoginByEmail(identifier, password);
+        toast({
+          title: "Login Successful",
+          description: `Welcome back, ${user.displayName || user.email}!`,
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+        });
+      } else {
+        const user = await userLoginByCustomerID(identifier, password);
+        toast({
+          title: "Login Successful",
+          description: `Welcome back, ${user.displayName || user.email}!`,
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+        });
+      }
+
       navigate("/dashboard");
     } catch (error) {
       toast({
         title: "Login Failed",
-        description: error.message,
+        description: error.message || "An error occurred during login.",
         status: "error",
         duration: 5000,
         isClosable: true,
         icon: <LuAlertCircle />,
       });
-
     } finally {
       setLoading(false);
     }
@@ -108,11 +116,11 @@ const SignInForm = () => {
         borderColor={borderColor}
       >
         <VStack spacing={6} align="stretch">
-          <Heading as="h1" size="xl" textAlign="center">
-            Sign in to your account
+          <Heading as="h3" size="md" textAlign="center">
+            Sign in to your Ad finacne account
           </Heading>
-          <Text textAlign="center" color="gray.600">
-            Welcome back! Please enter your details to login.
+          <Text textAlign="center" as='mark' color="gray.600" borderWidth={2} borderRadius={5} p={2}  colorScheme='red'>
+          Ensuring your financial future with Ad Finance
           </Text>
           {loading ? (
             <Center>
@@ -122,8 +130,7 @@ const SignInForm = () => {
             <form onSubmit={handleSubmit}>
               <VStack spacing={4}>
                 <FormControl isInvalid={!!errors.identifier}>
-                  {/* <FormLabel>Customer ID or Email</FormLabel> */}
-                  <FormLabel>Email Id</FormLabel>
+                  <FormLabel>Email or Customer ID</FormLabel>
                   <InputGroup>
                     <InputLeftElement pointerEvents="none">
                       <FiUser color="gray.300" />
@@ -139,8 +146,17 @@ const SignInForm = () => {
                 </FormControl>
 
                 <FormControl isInvalid={!!errors.password}>
+                  <Flex justify="space-between" mb={2}>
+                    <Link color="teal.500" href="/forgot-password" fontSize="sm">
+                      Forgot Password?
+                    </Link>
+                    <Link color="teal.500" href="/forgot-customerId" fontSize="sm">
+                      Forgot Customer ID?
+                    </Link>
+                  </Flex>
                   <FormLabel>Password</FormLabel>
                   <InputGroup>
+                  
                     <InputLeftElement pointerEvents="none">
                       <FiLock color="gray.300" />
                     </InputLeftElement>
@@ -155,12 +171,6 @@ const SignInForm = () => {
                   {errors.password && <Text color="red.500" fontSize="sm">{errors.password}</Text>}
                 </FormControl>
 
-                <Flex justify="flex-end" width="100%">
-                  <Link color="teal.500" href="/forgot-password" fontSize="sm">
-                    Forgot Password?
-                  </Link>
-                </Flex>
-
                 <Button
                   colorScheme="teal"
                   type="submit"
@@ -170,7 +180,6 @@ const SignInForm = () => {
                 >
                   Sign In
                 </Button>
-
 
                 <Flex justify="center">
                   <Text>Don't have an account?</Text>

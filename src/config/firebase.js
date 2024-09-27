@@ -13,6 +13,22 @@ const firebaseConfig = {
 	messagingSenderId: "615426489562",
 	appId: "1:615426489562:web:0da308db127223ed6a39e3",
 	measurementId: "G-ZX89L4HQL2"
+// 	apiKey: "AIzaSyDuAtS9V4eiP49Gq8n3-CM9TJSZdfqRNtk",
+
+//   authDomain: "train-site.firebaseapp.com",
+
+//   databaseURL: "https://train-site-default-rtdb.firebaseio.com",
+
+//   projectId: "train-site",
+
+//   storageBucket: "train-site.appspot.com",
+
+//   messagingSenderId: "79077593679",
+
+//   appId: "1:79077593679:web:b4db26802f729fd24d903a",
+
+//   measurementId: "G-11B18P78Z0"
+
 
 };
 // Initialize Firebase
